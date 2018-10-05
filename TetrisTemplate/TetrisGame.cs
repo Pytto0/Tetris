@@ -13,8 +13,10 @@ class TetrisGame : Game
     GameWorld gameWorld;
     Texture2D emptyCell;
     TetrisGrid tetrisGrid;
-    int[][] allBlocks = new int[10][];
+    SpriteFont font;
+    int[][] allBlocks = new int[0][];
     int score, level;
+    float blockWaitTime = 3f, blockTimeCounter, downWaitTime = 1f, downTimeCounter;
 
     /// <summary>
     /// A static reference to the ContentManager object, used for loading assets.
@@ -60,103 +62,64 @@ class TetrisGame : Game
         spriteBatch = new SpriteBatch(GraphicsDevice);
         emptyCell = Content.Load<Texture2D>("Block");
         // create and reset the game world
+        font = ContentManager.Load<SpriteFont>("SpelFont");
         gameWorld = new GameWorld();
         gameWorld.Reset();
-    }
-    public static int[][] generateForm(int form, int x, int y)
-    {
-        switch (form)
-        {
-            case 0:
-                return new int[][] { new int[] { 0 + x, 0 + y }, new int[] { 0 + x, 1 + y }, new int[] { 0 + x, 2 + y }, new int[] { 0 + x, 3 + y } }; //vierblokkige staaf
-            case 1:
-                return new int[][] { new int[] { 1 + x, 0 + y }, new int[] { 2 + x, 0 + y }, new int[] { 0 + x, 1 + y }, new int[] { 1 + x, 1 + y } }; //omgekeerde "Z"
-            case 2:
-                return new int[][] { new int[] { 0 + x, 0 + y }, new int[] { 1 + x, 0 + y }, new int[] { 1 + x, 1 + y }, new int[] { 2 + x, 1 + y } }; //"Z"
-            case 3:
-                return new int[][] { new int[] { 2 + x, 0 + y }, new int[] { 0 + x, 1 + y }, new int[] { 1 + x, 1 + y }, new int[] { 2 + x, 1 + y } }; //"L"
-            case 4:
-                return new int[][] { new int[] { 0 + x, 0 + y }, new int[] { 0 + x, 1 + y }, new int[] { 1 + x, 1 + y }, new int[] { 2 + x, 1 + y } }; //omgekeerde "L"
-            default:
-                return new int[][] { new int[] { 0 + x, 0 + y }, new int[] { 1 + x, 0 + y }, new int[] { 0 + x, 1 + y }, new int[] { 1 + x, 1 + y } }; //vierkant blok
-        }
-            
     }
 
     public void FallDown()
     {
         foreach (int[] block in allBlocks) // Loop voor alle (grote) arrays in allBlocks.
         {
-            int[] blockBelow = block; //block is de oorspronkelijke positie en blockBelow is de positie eronder.
-            int y = blockBelow[1]; // Declaratie van y, waarin het gelijk wordt gesteld aan de y-coördinaat.
+            int[] blockBelow = (int[]) block.Clone(); //block is de oorspronkelijke positie en blockBelow is de positie eronder.
+            int y = block[1]; // Declaratie van y, waarin het gelijk wordt gesteld aan de y-coördinaat.
+            Debug.WriteLine("y1 " + y);
             blockBelow[1] = y + 1; // Verandering van blockBelow[1] (de y-coördinaat).
-            if (!(allBlocks.Contains(blockBelow) || y + 1 == 20)) // Als allBlocks geen "blockBelow" heeft, of y+1 is niet 20...
-            {block[1] = y + 1;} // ...dan gaan de originele y-coördinaat (block) omlaag, en zo niet dan gebeurt er niks.
-        }
-    }
-
-    public int[][] AddArrayToArray(int[][] arr1, int[][]arr2)
-    {
-        arr1.CopyTo(arr2, arr2.Length + 1);
-        return arr1;
-    }
-
-   /* public static BitArray GenerateBlock(short blockCode)
-    {
-        byte[] bytes = BitConverter.GetBytes(blockCode);
-        System.Collections.BitArray arrBit = new BitArray(bytes);
-        return arrBit;
-    }
-
-    public static bool GetBit(BitArray bitArr, int pos)
-    {
-        return bitArr.Get(pos);
-    } */
-
-    /*public static int[][] ConvertBAToDrawableArray(int startx, int starty, BitArray BA, Texture2D emptyCell)
-    {
-        int[][] jaggedArr = new int[12][];
-        int i = 0;
-        for(int x = startx; x < startx + 3*emptyCell.Width; startx += emptyCell.Width)
-        {
-            for(int y = starty; y < starty + 4*emptyCell.Height; starty += emptyCell.Height)
+            Debug.WriteLine("y2 " + y);
+            if (!(allBlocks.Contains(blockBelow)) && y <= 20) // Als allBlocks geen "blockBelow" heeft, of y+1 is niet 20...
             {
-                if(GetBit(BA, (i)))
-                {
-                    jaggedArr[i] = new int[2] { x, y };
-                }
-                i++;
-            }
-        }
-        return jaggedArr;
-    } */
-    /*public static bool[,] ConvertBAToDrawableArray(int startx, int starty, BitArray BA, Texture2D emptyCell)
-{
-
-    bool[,] jaggedArr = new bool[startx/emptyCell.Width + 3, starty/emptyCell.Height + 4];
-    int i = 0;
-    for(int x = startx; x < startx + 3*emptyCell.Width; x += emptyCell.Width)
-    {
-            
-        for(int y = starty; y < starty + 4*emptyCell.Height; y += emptyCell.Height)
-        {
-                
-            if(GetBit(BA, (i)))
-            {
-                    jaggedArr[x / emptyCell.Width, y / emptyCell.Height] = true;
-            } 
-            i++;
+                block[1] = y + 1;
+                Debug.WriteLine("TEST " + block[1]);
+            } // ...dan gaan de originele y-coördinaat (block) omlaag, en zo niet dan gebeurt er niks.
         }
     }
-    return jaggedArr;  
-}  */
+
+    public static int[][] AddJaggedArrayToJaggedArray(int[][] arr1, int[][] arr2)
+    {
+        int[][] temporaryArr = new int[arr1.Length + arr2.Length][];
+        for (int i = 0; i < arr1.Length; i++)
+        {
+            if (arr1[i] != null)
+                temporaryArr[i] = arr1[i];
+        }
+        for (int j = 0; j < arr2.Length; j++)
+        {
+            if (arr2[j] != null)
+                temporaryArr[j + arr1.Length] = arr2[j];
+        }
+        temporaryArr = temporaryArr.Where(c => c != null).ToArray();
+        return temporaryArr;
+    }
     
     protected override void Update(GameTime gameTime)
     {
         if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Escape))
-        {
-            Exit();
+        { Exit(); }
+        if(downWaitTime <= downTimeCounter){
+            downTimeCounter = 0;
+            FallDown();
         }
+        if(blockWaitTime <= blockTimeCounter)
+        {
+            blockTimeCounter = 0;
+            Random rnd = new Random();
+            int generate = rnd.Next(0, 6);
+            int[][] form = TetrisGrid.generateForm(generate, 5, 0);
+            allBlocks = AddJaggedArrayToJaggedArray(form, allBlocks);
+        }
+        downTimeCounter += (float)gameTime.ElapsedGameTime.TotalSeconds;
+        blockTimeCounter += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
         inputHelper.Update(gameTime);
         gameWorld.HandleInput(gameTime, inputHelper);
         gameWorld.Update(gameTime);
@@ -171,18 +134,41 @@ class TetrisGame : Game
         {
             for (int y = 0; y < tetrisGrid.Height; y++)
             {
-                {
-                    spriteBatch.Draw(emptyCell, new Vector2(x * emptyCell.Width, y * emptyCell.Height), Color.White);
-                }
+                spriteBatch.Draw(emptyCell, new Vector2(x * emptyCell.Width, y * emptyCell.Height), Color.White);
             }
         }
-        int[][] form = generateForm(0, 0, 0);
 
-        foreach(int[] coord in form)
+        foreach (int[] coord in allBlocks)
         {
-            spriteBatch.Draw(emptyCell, new Vector2(coord[0] * emptyCell.Width, coord[1] * emptyCell.Height), Color.Yellow);
+            int colorCode = coord[2];
+            Color col;
+            switch(colorCode){
+                case 0:
+                    col = Color.Yellow;
+                    break;
+                case 1:
+                    col = Color.Red;
+                    break;
+                case 2:
+                    col = Color.Blue;
+                    break;
+                case 3:
+                    col = Color.Brown;
+                    break;
+                case 4:
+                    col = Color.Green;
+                    break;
+                case 5:
+                    col = Color.Purple;
+                    break;
+                default:
+                    col = Color.Aqua;
+                    break;
+            }
+            spriteBatch.Draw(emptyCell, new Vector2(coord[0] * emptyCell.Width, coord[1] * emptyCell.Height), col);
         }
-
+        string passedTime = gameTime.TotalGameTime.Seconds.ToString();
+        spriteBatch.DrawString(font, passedTime, new Vector2(500, 500), Color.Blue);
 
         //spriteBatch.Draw(emptyCell, new Vector2(0, 0), Color.Yellow);
         spriteBatch.End(); 
