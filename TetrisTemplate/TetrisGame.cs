@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Content;
 using System.Collections;
 using System.Diagnostics;
+using System.Linq;
 
 class TetrisGame : Game
 {
@@ -67,12 +68,39 @@ class TetrisGame : Game
         switch (form)
         {
             case 0:
-                return new int[][] { new int[] { 0 + x, 0 + y }, new int[]{ 0 + x, 1 + y }, new int[]{ 0 + x, 2 + y }, new int[]{ 0 + x, 3 + y } }; //vierblokkige staaf
+                return new int[][] { new int[] { 0 + x, 0 + y }, new int[] { 0 + x, 1 + y }, new int[] { 0 + x, 2 + y }, new int[] { 0 + x, 3 + y } }; //vierblokkige staaf
+            case 1:
+                return new int[][] { new int[] { 1 + x, 0 + y }, new int[] { 2 + x, 0 + y }, new int[] { 0 + x, 1 + y }, new int[] { 1 + x, 1 + y } }; //omgekeerde "Z"
+            case 2:
+                return new int[][] { new int[] { 0 + x, 0 + y }, new int[] { 1 + x, 0 + y }, new int[] { 1 + x, 1 + y }, new int[] { 2 + x, 1 + y } }; //"Z"
+            case 3:
+                return new int[][] { new int[] { 2 + x, 0 + y }, new int[] { 0 + x, 1 + y }, new int[] { 1 + x, 1 + y }, new int[] { 2 + x, 1 + y } }; //"L"
+            case 4:
+                return new int[][] { new int[] { 0 + x, 0 + y }, new int[] { 0 + x, 1 + y }, new int[] { 1 + x, 1 + y }, new int[] { 2 + x, 1 + y } }; //omgekeerde "L"
             default:
                 return new int[][] { new int[] { 0 + x, 0 + y }, new int[] { 1 + x, 0 + y }, new int[] { 0 + x, 1 + y }, new int[] { 1 + x, 1 + y } }; //vierkant blok
         }
             
     }
+
+    public void FallDown()
+    {
+        foreach (int[] block in allBlocks) // Loop voor alle (grote) arrays in allBlocks.
+        {
+            int[] blockBelow = block; //block is de oorspronkelijke positie en blockBelow is de positie eronder.
+            int y = blockBelow[1]; // Declaratie van y, waarin het gelijk wordt gesteld aan de y-coördinaat.
+            blockBelow[1] = y + 1; // Verandering van blockBelow[1] (de y-coördinaat).
+            if (!(allBlocks.Contains(blockBelow) || y + 1 == 20)) // Als allBlocks geen "blockBelow" heeft, of y+1 is niet 20...
+            {block[1] = y + 1;} // ...dan gaan de originele y-coördinaat (block) omlaag, en zo niet dan gebeurt er niks.
+        }
+    }
+
+    public int[][] AddArrayToArray(int[][] arr1, int[][]arr2)
+    {
+        arr1.CopyTo(arr2, arr2.Length + 1);
+        return arr1;
+    }
+
    /* public static BitArray GenerateBlock(short blockCode)
     {
         byte[] bytes = BitConverter.GetBytes(blockCode);
