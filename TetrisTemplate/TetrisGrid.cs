@@ -30,27 +30,6 @@ class TetrisGrid
         position = Vector2.Zero;
         Clear();
     }
-    public static int[][] generateForm(int form, int x, int y)
-    {
-        switch (form)
-        {
-            case 0:
-                return new int[][] { new int[] { x, y, form }, new int[] { x, 1 + y, form }, new int[] { x, 2 + y, form }, new int[] { x, 3 + y, form } }; //vierblokkige staaf
-            case 1:
-                return new int[][] { new int[] { 1 + x, y, form }, new int[] { 2 + x, y, form }, new int[] { x, 1 + y, form }, new int[] { 1 + x, 1 + y, form } }; //omgekeerde "Z"
-            case 2:
-                return new int[][] { new int[] { x, y, form }, new int[] { 1 + x, y, form }, new int[] { 1 + x, 1 + y, form }, new int[] { 2 + x, 1 + y, form } }; //"Z"
-            case 3:
-                return new int[][] { new int[] { 2 + x, y, form }, new int[] { x, 1 + y, form }, new int[] { 1 + x, 1 + y, form }, new int[] { 2 + x, 1 + y, form } }; //"L"
-            case 4:
-                return new int[][] { new int[] { x, y, form }, new int[] { x, 1 + y, form }, new int[] { 1 + x, 1 + y, form }, new int[] { 2 + x, 1 + y, form } }; //omgekeerde "L"
-            case 5:
-                return new int[][] { new int[] { 1 + x, y, form }, new int[] { x, 1 + y, form }, new int[] { 1 + x, 1 + y, form }, new int[] { 2 + x, 1 + y, form } }; //"T"
-            default:
-                return new int[][] { new int[] { x, y, form }, new int[] { 1 + x, y, form }, new int[] { x, 1 + y, form }, new int[] { 1 + x, 1 + y, form } }; //vierkant blok
-        }
-
-    }
     /// <summary>
     /// Draws the grid on the screen.
     /// </summary>

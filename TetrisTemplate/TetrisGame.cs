@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework.Content;
 using System.Collections;
 using System.Diagnostics;
 using System.Linq;
+using System.Collections.Generic;
 
 class TetrisGame : Game
 {
@@ -14,15 +15,16 @@ class TetrisGame : Game
     Texture2D emptyCell;
     TetrisGrid tetrisGrid;
     SpriteFont font;
-    int[][] allBlocks = new int[0][];
+    int[][][] allBlocks = new int[0][][];
     int score, level;
-    float blockWaitTime = 3f, blockTimeCounter, downWaitTime = 1f, downTimeCounter;
+    float blockWaitTime = 3f, blockTimeCounter, downWaitTime = 0.25f, downTimeCounter;
 
     /// <summary>
     /// A static reference to the ContentManager object, used for loading assets.
     /// </summary>
     public static ContentManager ContentManager { get; private set; }
-
+    public static List<SubBlock> allSubBlocks { get; private set; } //we willen dit alleenmaar vanuit deze klasse kunnen aanpassen (opvragen mag altijd).
+    public Block currentBlock;
     /// <summary>
     /// A static reference to the width and height of the screen.
     /// </summary>
@@ -55,6 +57,10 @@ class TetrisGame : Game
         inputHelper = new InputHelper();
 
         tetrisGrid = new TetrisGrid();
+
+        allSubBlocks = new List<SubBlock> { };
+        List<int[][]> fallenSubBlockList = new List<int[][]>(); //lijst van alle blokjes die momenteel stil staan en niet meer kunnen bewgen
+        int[][] currentBlock = new int[1][]; //lijst van alle grote blokken die momenteel stil staan.
     }
 
     protected override void LoadContent()
@@ -67,55 +73,38 @@ class TetrisGame : Game
         gameWorld.Reset();
     }
 
-    public void FallDown()
-    {
-        foreach (int[] block in allBlocks) // Loop voor alle (grote) arrays in allBlocks.
-        {
-            int[] blockBelow = (int[]) block.Clone(); //block is de oorspronkelijke positie en blockBelow is de positie eronder.
-            int y = block[1]; // Declaratie van y, waarin het gelijk wordt gesteld aan de y-coördinaat.
-            Debug.WriteLine("y1 " + y);
-            blockBelow[1] = y + 1; // Verandering van blockBelow[1] (de y-coördinaat).
-            Debug.WriteLine("y2 " + y);
-            if (!(allBlocks.Contains(blockBelow)) && y <= 20) // Als allBlocks geen "blockBelow" heeft, of y+1 is niet 20...
-            {
-                block[1] = y + 1;
-                Debug.WriteLine("TEST " + block[1]);
-            } // ...dan gaan de originele y-coördinaat (block) omlaag, en zo niet dan gebeurt er niks.
-        }
-    }
-
-    public static int[][] AddJaggedArrayToJaggedArray(int[][] arr1, int[][] arr2)
-    {
-        int[][] temporaryArr = new int[arr1.Length + arr2.Length][];
-        for (int i = 0; i < arr1.Length; i++)
-        {
-            if (arr1[i] != null)
-                temporaryArr[i] = arr1[i];
-        }
-        for (int j = 0; j < arr2.Length; j++)
-        {
-            if (arr2[j] != null)
-                temporaryArr[j + arr1.Length] = arr2[j];
-        }
-        temporaryArr = temporaryArr.Where(c => c != null).ToArray();
-        return temporaryArr;
-    }
     
     protected override void Update(GameTime gameTime)
     {
         if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Escape))
-        { Exit(); }
+             Exit();
+        if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Up))
+            if(currentBlock != null)
+                currentBlock.Turn();
         if(downWaitTime <= downTimeCounter){
             downTimeCounter = 0;
-            FallDown();
+            if (currentBlock != null)
+            {
+                if (currentBlock.CanFallDown())
+                {
+                    currentBlock.BlockFallDown();
+                }
+                else
+                {
+                    currentBlock.AddToFallenBlocks();
+                    Debug.WriteLine("test");
+                    currentBlock = null;
+                }
+            }
         }
         if(blockWaitTime <= blockTimeCounter)
         {
             blockTimeCounter = 0;
             Random rnd = new Random();
-            int generate = rnd.Next(0, 6);
-            int[][] form = TetrisGrid.generateForm(generate, 5, 0);
-            allBlocks = AddJaggedArrayToJaggedArray(form, allBlocks);
+            int form = rnd.Next(0, 6);
+            if (currentBlock == null)
+                currentBlock = new Block(5, -3, form);
+
         }
         downTimeCounter += (float)gameTime.ElapsedGameTime.TotalSeconds;
         blockTimeCounter += (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -129,7 +118,6 @@ class TetrisGame : Game
     {
         GraphicsDevice.Clear(Color.White);
         spriteBatch.Begin();
-        //bool[,] arr = ConvertBAToDrawableArray(0, 0, GenerateBlock(3456), emptyCell);
         for (int x = 0; x < tetrisGrid.Width; x++)
         {
             for (int y = 0; y < tetrisGrid.Height; y++)
@@ -137,40 +125,22 @@ class TetrisGame : Game
                 spriteBatch.Draw(emptyCell, new Vector2(x * emptyCell.Width, y * emptyCell.Height), Color.White);
             }
         }
-
-        foreach (int[] coord in allBlocks)
+        if(currentBlock != null)
         {
-            int colorCode = coord[2];
-            Color col;
-            switch(colorCode){
-                case 0:
-                    col = Color.Yellow;
-                    break;
-                case 1:
-                    col = Color.Red;
-                    break;
-                case 2:
-                    col = Color.Blue;
-                    break;
-                case 3:
-                    col = Color.Brown;
-                    break;
-                case 4:
-                    col = Color.Green;
-                    break;
-                case 5:
-                    col = Color.Purple;
-                    break;
-                default:
-                    col = Color.Aqua;
-                    break;
+            foreach (SubBlock subBlock in currentBlock.subBlockArray)
+            {
+                spriteBatch.Draw(emptyCell, new Vector2(subBlock.X * emptyCell.Width, subBlock.Y * emptyCell.Height), subBlock.color);
             }
-            spriteBatch.Draw(emptyCell, new Vector2(coord[0] * emptyCell.Width, coord[1] * emptyCell.Height), col);
+        }
+        if (TetrisGame.allSubBlocks.ToArray().Length > 0)
+        {
+            foreach (SubBlock subBlock in allSubBlocks)
+            {
+                spriteBatch.Draw(emptyCell, new Vector2(subBlock.X * emptyCell.Width, subBlock.Y * emptyCell.Height), subBlock.color);
+            }
         }
         string passedTime = gameTime.TotalGameTime.Seconds.ToString();
         spriteBatch.DrawString(font, passedTime, new Vector2(500, 500), Color.Blue);
-
-        //spriteBatch.Draw(emptyCell, new Vector2(0, 0), Color.Yellow);
         spriteBatch.End(); 
         gameWorld.Draw(gameTime, spriteBatch);
     }
