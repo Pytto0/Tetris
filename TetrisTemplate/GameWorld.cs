@@ -60,7 +60,7 @@ class GameWorld
     {
         spriteBatch.Begin();
         grid.Draw(gameTime, spriteBatch);
-        spriteBatch.DrawString(font, "Hello!", new Vector2(30*TetrisGrid.Width, 5*TetrisGrid.Height), Color.Blue);
+        spriteBatch.DrawString(font, "Hello!", new Vector2(30*TetrisGrid.Width + 20, 5*TetrisGrid.Height), Color.Blue);
         spriteBatch.End();
     }
 

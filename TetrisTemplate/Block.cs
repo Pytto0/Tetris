@@ -5,7 +5,6 @@ using System.Linq;
 
 class Block
 {
-
     public SubBlock[] subBlockArray { get; }
     public int Form { get; }
 
@@ -55,7 +54,6 @@ class Block
         }
     }
 
-
     public bool IsInBounds()
     {
         foreach(SubBlock subBlock in subBlockArray)
@@ -84,7 +82,6 @@ class Block
     {
         foreach(SubBlock subBlock in subBlockArray)
         {
-
             SubBlock changedSubBlock = new SubBlock(subBlock.X + xChange, subBlock.Y + yChange, subBlock.Color);
             //Debug.WriteLine("subBlockX: " + subBlock.X + "changedSubBlock: " + changedSubBlock.X);
             if (changedSubBlock.X < 0 || changedSubBlock.X >= TetrisGrid.Width || changedSubBlock.Y >= TetrisGrid.Height)

@@ -16,7 +16,7 @@ class TetrisGame : Game
     TetrisGrid tetrisGrid;
     SpriteFont font;
     int[][][] allBlocks = new int[0][][];
-    int score, level;
+    public int score, level;
     float blockWaitTime = 1f, blockTimeCounter, downWaitTime = 0.5f, downTimeCounter;
 
     /// <summary>
@@ -73,9 +73,30 @@ class TetrisGame : Game
         gameWorld.Reset();
     }
 
+    public bool IsGameOver()
+    {
+        foreach (SubBlock lastBlock in allSubBlocks)
+        {
+            if (lastBlock.Y == -1)
+            { return true; }
+        }
+        return false;
+    }
+    
+    public void Reset()
+    {
+        if (!IsGameOver())
+        {
+            Random rnd = new Random();
+            int form = rnd.Next(0, 6);
+            if (currentBlock == null)
+                currentBlock = new Block(5, -1, form);
+        }
+    }
+
     protected override void Update(GameTime gameTime)
     {
-        downWaitTime = 0.5f;
+        level = score / 100;
         if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Escape))
              Exit();
         if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Up))
@@ -90,8 +111,9 @@ class TetrisGame : Game
         if (inputHelper.KeyDown(Microsoft.Xna.Framework.Input.Keys.Down))
             if (currentBlock != null)
                 downTimeCounter += 4*(float)gameTime.ElapsedGameTime.TotalSeconds;
-        if (downWaitTime <= downTimeCounter){
-            downTimeCounter = 0;
+        if (downWaitTime <= downTimeCounter)
+        {
+            downTimeCounter = level * 0.03f;
             if (currentBlock != null)
             {
                 if (currentBlock.CanMoveTo(0, 1))
@@ -101,7 +123,8 @@ class TetrisGame : Game
                 else
                 {
                     currentBlock.AddToFallenBlocks();
-                    //Debug.WriteLine("test");
+                    score += 10; //Change this to 30 if you want to debug.
+                    //Debug.WriteLine("The current falling block speed is: " + downTimeCounter);
                     currentBlock = null;
                 }
             }
@@ -109,11 +132,7 @@ class TetrisGame : Game
         if(blockWaitTime <= blockTimeCounter)
         {
             blockTimeCounter = 0;
-            Random rnd = new Random();
-            int form = rnd.Next(0, 6);
-            if (currentBlock == null)
-                currentBlock = new Block(5, -1, form);
-
+            Reset();
         }
         downTimeCounter += (float)gameTime.ElapsedGameTime.TotalSeconds;
         blockTimeCounter += (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -125,6 +144,7 @@ class TetrisGame : Game
 
     protected override void Draw(GameTime gameTime)
     {
+        level = score / 100;
         GraphicsDevice.Clear(Color.White);
         spriteBatch.Begin();
         for (int x = 0; x < TetrisGrid.Width; x++)
@@ -148,7 +168,11 @@ class TetrisGame : Game
                 spriteBatch.Draw(emptyCell, new Vector2(subBlock.X * emptyCell.Width, subBlock.Y * emptyCell.Height), subBlock.Color);
             }
         }
-        string passedTime = gameTime.TotalGameTime.Seconds.ToString();
+        string currentlevel = "Level: " + level.ToString();
+        string scorecount = "Score: " + score.ToString();
+        string passedTime = "Time: " + gameTime.TotalGameTime.Seconds.ToString();
+        spriteBatch.DrawString(font, currentlevel, new Vector2(500, 460), Color.Blue);
+        spriteBatch.DrawString(font, scorecount, new Vector2(500, 480), Color.Blue);
         spriteBatch.DrawString(font, passedTime, new Vector2(500, 500), Color.Blue);
         spriteBatch.End(); 
         gameWorld.Draw(gameTime, spriteBatch);
