@@ -15,7 +15,7 @@ class Block
         Form = form;
     }
 
-    /*public bool CanTurn()
+    public bool CanTurn()
     {
         foreach (SubBlock subBlock1 in subBlockArray)
         {
@@ -23,30 +23,30 @@ class Block
             {
                 foreach (SubBlock subBlock2 in TetrisGame.allSubBlocks)
                 {
-                    int x = subBlock2.X;
-                    int y = subBlock2.Y;
                     SubBlock turnBlock = GetCurrentTurnBlock();
                     int tx = turnBlock.X;
                     int ty = turnBlock.Y;
+                    SubBlock temporarySubBlock = new SubBlock(subBlock1.Y + tx - ty, -subBlock1.X + tx + ty, subBlock1.Color);
 
-                    subBlock2.X = (y + tx - ty);
-                    subBlock2.Y = (tx + ty - x);
-
-                    if (subBlock1.X == subBlock2.X && subBlock1.Y == subBlock2.Y)
+                    if (temporarySubBlock.IsInSubBlock(subBlock2) || !temporarySubBlock.IsInBounds())
+                    {
                         return false;
+                    }
+
+                    temporarySubBlock = null;
                 }
             }
         }
         return true;
-    }*/
+    }
 
     public void Turn()
     {
         foreach(SubBlock subBlock in subBlockArray)
         {
+            SubBlock turnBlock = GetCurrentTurnBlock();
             int x = subBlock.X;
             int y = subBlock.Y;
-            SubBlock turnBlock = GetCurrentTurnBlock();
             int tx = turnBlock.X;
             int ty = turnBlock.Y;
 
@@ -54,22 +54,61 @@ class Block
             subBlock.Y = (tx + ty - x);
         }
     }
-    public void MoveLeft()
+
+
+    public bool IsInBounds()
     {
-        foreach (SubBlock subBlock in subBlockArray)
+        foreach(SubBlock subBlock in subBlockArray)
         {
-            int x = subBlock.X;
-            //if (subBlock.X > 0) //Dit werkt ook al niet...
-                subBlock.X = (x - 1);
+            if (!subBlock.IsInBounds())
+            {
+                return false;
+            }
         }
+        return true;
     }
-    public void MoveRight()
+
+    public bool IsThisInSubBlock(SubBlock subBlock)
     {
-        foreach (SubBlock subBlock in subBlockArray)
+        foreach(SubBlock subBlock2 in subBlockArray)
         {
-            int x = subBlock.X;
-            //if (subBlock.X < 10)
-                subBlock.X = (x + 1);
+            if(subBlock.IsInSubBlock(subBlock2))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public bool CanMoveTo(int xChange, int yChange)
+    {
+        foreach(SubBlock subBlock in subBlockArray)
+        {
+
+            SubBlock changedSubBlock = new SubBlock(subBlock.X + xChange, subBlock.Y + yChange, subBlock.Color);
+            //Debug.WriteLine("subBlockX: " + subBlock.X + "changedSubBlock: " + changedSubBlock.X);
+            if (changedSubBlock.X < 0 || changedSubBlock.X >= TetrisGrid.Width || changedSubBlock.Y >= TetrisGrid.Height)
+            {
+                return false;
+            }
+            if (TetrisGame.allSubBlocks.ToArray().Length > 0)
+            {
+                foreach (SubBlock fallenSubBlock in TetrisGame.allSubBlocks)
+                {
+                    if (changedSubBlock.IsInSubBlock(fallenSubBlock))
+                        return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public void MoveTo(int xChange, int yChange)
+    {
+        foreach(SubBlock subBlock in subBlockArray)
+        {
+            subBlock.X += xChange;
+            subBlock.Y += yChange;
         }
     }
     public SubBlock GetCurrentTurnBlock()
@@ -93,7 +132,7 @@ class Block
         }
     }
 
-    public bool CanFallDown()
+    /*public bool CanFallDown()
     {
         foreach (SubBlock subBlock1 in subBlockArray)
         {
@@ -111,7 +150,7 @@ class Block
                 return false;
         }
         return true;
-    }
+    } */
 
     public void AddToFallenBlocks()
     {
@@ -123,13 +162,13 @@ class Block
         }
     }
 
-    public void BlockFallDown() //allFallenSubBlocks: een lijst van 1 bij 1 blokjes die of op andere blokjes staan of op de grond staan
+    /*public void BlockFallDown() //allFallenSubBlocks: een lijst van 1 bij 1 blokjes die of op andere blokjes staan of op de grond staan
       {
         foreach (SubBlock subBlock in subBlockArray)
         {
             subBlock.Y += 1;
         }
-    }
+    } */
 
     public SubBlock[] GenerateBlock(int form, int gridX, int gridY) //de eerste subarragridY is ALTIJD de vorm (en dat is dan weer de kleurcode).
         {

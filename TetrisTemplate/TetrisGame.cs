@@ -60,7 +60,7 @@ class TetrisGame : Game
 
         allSubBlocks = new List<SubBlock> { };
         List<int[][]> fallenSubBlockList = new List<int[][]>(); //lijst van alle blokjes die momenteel stil staan en niet meer kunnen bewgen
-        int[][] currentBlock = new int[1][]; //lijst van alle grote blokken die momenteel stil staan.
+        //int[][] currentBlock = new int[1][]; //lijst van alle grote blokken die momenteel stil staan.
     }
 
     protected override void LoadContent()
@@ -79,24 +79,24 @@ class TetrisGame : Game
         if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Escape))
              Exit();
         if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Up))
-            if(currentBlock != null) // && currentBlock.CanTurn()) //CanTurn() is not working...
+            if(currentBlock != null && currentBlock.CanTurn()) 
                 currentBlock.Turn();
         if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Left))
-            if (currentBlock != null)
-                currentBlock.MoveLeft();
+            if (currentBlock != null && currentBlock.CanMoveTo(-1, 0))
+                currentBlock.MoveTo(-1, 0);
         if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Right))
-            if (currentBlock != null)
-                currentBlock.MoveRight();
+            if (currentBlock != null && currentBlock.CanMoveTo(1, 0))
+                currentBlock.MoveTo(1, 0);
         if (inputHelper.KeyDown(Microsoft.Xna.Framework.Input.Keys.Down))
             if (currentBlock != null)
-                downWaitTime = 0;
+                downTimeCounter += 4*(float)gameTime.ElapsedGameTime.TotalSeconds;
         if (downWaitTime <= downTimeCounter){
             downTimeCounter = 0;
             if (currentBlock != null)
             {
-                if (currentBlock.CanFallDown())
+                if (currentBlock.CanMoveTo(0, 1))
                 {
-                    currentBlock.BlockFallDown();
+                    currentBlock.MoveTo(0, 1);
                 }
                 else
                 {
@@ -127,9 +127,9 @@ class TetrisGame : Game
     {
         GraphicsDevice.Clear(Color.White);
         spriteBatch.Begin();
-        for (int x = 0; x < tetrisGrid.Width; x++)
+        for (int x = 0; x < TetrisGrid.Width; x++)
         {
-            for (int y = 0; y < tetrisGrid.Height; y++)
+            for (int y = 0; y < TetrisGrid.Height; y++)
             {
                 spriteBatch.Draw(emptyCell, new Vector2(x * emptyCell.Width, y * emptyCell.Height), Color.White);
             }

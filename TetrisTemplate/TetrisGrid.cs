@@ -15,10 +15,10 @@ class TetrisGrid
     SpriteBatch spriteBatch;
 
     /// The number of grid elements in the x-direction.
-    public int Width { get { return 10; } }
+    public static int Width { get { return 10; } }
    
     /// The number of grid elements in the y-direction.
-    public int Height { get { return 20; } }
+    public static int Height { get { return 20; } }
 
     /// <summary>
     /// Creates a new TetrisGrid.

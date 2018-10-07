@@ -3,7 +3,7 @@ using System.Linq;
 
 static class ArrayHelper
 {
-    public static bool IsArrayInJArray(int[] searchArray, int[][] JArray) //JArray = JaggedArray
+    /*public static bool IsArrayInJArray(int[] searchArray, int[][] JArray) //JArray = JaggedArray
     {
         foreach(int[] subArray in JArray)
         {
@@ -32,6 +32,6 @@ static class ArrayHelper
         temporaryArr = temporaryArr.Where(c => c != null).ToArray();
         return temporaryArr;
     }
-
+     */
 }
 

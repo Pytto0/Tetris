@@ -12,7 +12,23 @@ class SubBlock
         X = x;
         Y = y;
         Color = c;
-    }    
+    }
+    public bool IsInBounds()
+    {
+        if (X < 0 || X >= TetrisGrid.Width || Y >= TetrisGrid.Height)
+        {
+            return false;
+        }
+        return true;
+    }
+    public bool IsInSubBlock(SubBlock subBlock)
+    {
+        if (X == subBlock.X && Y == subBlock.Y)
+        {
+            return true;
+        }
+        return false;
+    }
 
 }
 
