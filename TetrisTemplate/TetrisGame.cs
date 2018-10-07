@@ -17,7 +17,7 @@ class TetrisGame : Game
     SpriteFont font;
     int[][][] allBlocks = new int[0][][];
     int score, level;
-    float blockWaitTime = 3f, blockTimeCounter, downWaitTime = 0.25f, downTimeCounter;
+    float blockWaitTime = 1f, blockTimeCounter, downWaitTime = 0.5f, downTimeCounter;
 
     /// <summary>
     /// A static reference to the ContentManager object, used for loading assets.
@@ -73,15 +73,24 @@ class TetrisGame : Game
         gameWorld.Reset();
     }
 
-    
     protected override void Update(GameTime gameTime)
     {
+        downWaitTime = 0.5f;
         if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Escape))
              Exit();
         if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Up))
-            if(currentBlock != null)
+            if(currentBlock != null) // && currentBlock.CanTurn()) //CanTurn() is not working...
                 currentBlock.Turn();
-        if(downWaitTime <= downTimeCounter){
+        if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Left))
+            if (currentBlock != null)
+                currentBlock.MoveLeft();
+        if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Right))
+            if (currentBlock != null)
+                currentBlock.MoveRight();
+        if (inputHelper.KeyDown(Microsoft.Xna.Framework.Input.Keys.Down))
+            if (currentBlock != null)
+                downWaitTime = 0;
+        if (downWaitTime <= downTimeCounter){
             downTimeCounter = 0;
             if (currentBlock != null)
             {
@@ -92,7 +101,7 @@ class TetrisGame : Game
                 else
                 {
                     currentBlock.AddToFallenBlocks();
-                    Debug.WriteLine("test");
+                    //Debug.WriteLine("test");
                     currentBlock = null;
                 }
             }
@@ -103,7 +112,7 @@ class TetrisGame : Game
             Random rnd = new Random();
             int form = rnd.Next(0, 6);
             if (currentBlock == null)
-                currentBlock = new Block(5, -3, form);
+                currentBlock = new Block(5, -1, form);
 
         }
         downTimeCounter += (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -129,14 +138,14 @@ class TetrisGame : Game
         {
             foreach (SubBlock subBlock in currentBlock.subBlockArray)
             {
-                spriteBatch.Draw(emptyCell, new Vector2(subBlock.X * emptyCell.Width, subBlock.Y * emptyCell.Height), subBlock.color);
+                spriteBatch.Draw(emptyCell, new Vector2(subBlock.X * emptyCell.Width, subBlock.Y * emptyCell.Height), subBlock.Color);
             }
         }
-        if (TetrisGame.allSubBlocks.ToArray().Length > 0)
+        if (allSubBlocks.ToArray().Length > 0)
         {
             foreach (SubBlock subBlock in allSubBlocks)
             {
-                spriteBatch.Draw(emptyCell, new Vector2(subBlock.X * emptyCell.Width, subBlock.Y * emptyCell.Height), subBlock.color);
+                spriteBatch.Draw(emptyCell, new Vector2(subBlock.X * emptyCell.Width, subBlock.Y * emptyCell.Height), subBlock.Color);
             }
         }
         string passedTime = gameTime.TotalGameTime.Seconds.ToString();
