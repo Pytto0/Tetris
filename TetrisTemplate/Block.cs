@@ -113,19 +113,19 @@ class Block
         switch (Form)
         {
             case 0:
-                return subBlockArray[1];
+                return subBlockArray[1]; //Vier blokken onder elkaar
             case 1:
-                return subBlockArray[3];
+                return subBlockArray[3]; //Omgekeerde Z
             case 2:
-                return subBlockArray[1];
+                return subBlockArray[1]; //Z
             case 3:
-                return subBlockArray[2];
+                return subBlockArray[2]; //L
             case 4:
-                return subBlockArray[1];
+                return subBlockArray[1]; //omgekeerde L
             case 5:
-                return subBlockArray[2];
+                return subBlockArray[2]; //T
             default:
-                return subBlockArray[0];
+                return subBlockArray[1]; //Vierkant blok
         }
     }
 
@@ -149,7 +149,7 @@ class Block
         return true;
     } */
 
-    public void AddToFallenBlocks()
+    public void AddToSubBlocks()
     {
         foreach(SubBlock subBlock in subBlockArray)
         {

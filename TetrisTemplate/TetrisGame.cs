@@ -17,7 +17,8 @@ class TetrisGame : Game
     SpriteFont font;
     int[][][] allBlocks = new int[0][][];
     public int score, level;
-    float blockWaitTime = 1f, blockTimeCounter, downWaitTime = 0.5f, downTimeCounter;
+    const float constBlockWaitTime = 1f, constDownWaitTime = 0.5f;
+    float blockWaitTime = constBlockWaitTime, blockTimeCounter, downWaitTime = constDownWaitTime, downTimeCounter, currentGameTime = 0f;
 
     /// <summary>
     /// A static reference to the ContentManager object, used for loading assets.
@@ -75,28 +76,30 @@ class TetrisGame : Game
 
     public bool IsGameOver()
     {
-        foreach (SubBlock lastBlock in allSubBlocks)
+        foreach (SubBlock subBlock in allSubBlocks)
         {
-            if (lastBlock.Y == -1)
-            { return true; }
+            if (subBlock.Y <= 0)
+                return true; 
         }
         return false;
     }
     
     public void Reset()
     {
-        if (!IsGameOver())
-        {
-            Random rnd = new Random();
-            int form = rnd.Next(0, 6);
-            if (currentBlock == null)
-                currentBlock = new Block(5, -1, form);
-        }
+        score = 0;
+        level = 1;
+        currentGameTime = 0f;
+        allSubBlocks.Clear();
+        blockWaitTime = constBlockWaitTime;
+        downWaitTime = constDownWaitTime;
+        currentBlock = null;
     }
 
     protected override void Update(GameTime gameTime)
     {
-        level = score / 100;
+        level = (int) (Math.Floor((double) (score/100)) + 1);
+        if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Space))
+            Reset();
         if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Escape))
              Exit();
         if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Up))
@@ -122,20 +125,26 @@ class TetrisGame : Game
                 }
                 else
                 {
-                    currentBlock.AddToFallenBlocks();
+                    currentBlock.AddToSubBlocks();
                     score += 10; //Change this to 30 if you want to debug.
                     //Debug.WriteLine("The current falling block speed is: " + downTimeCounter);
                     currentBlock = null;
                 }
             }
         }
-        if(blockWaitTime <= blockTimeCounter)
+        if (IsGameOver())
         {
-            blockTimeCounter = 0;
             Reset();
+        }
+        if(blockWaitTime <= blockTimeCounter && currentBlock == null)
+        {
+            Random rnd = new Random();
+            currentBlock = new Block(4, -3, rnd.Next(0, 7));
+            blockTimeCounter = 0;
         }
         downTimeCounter += (float)gameTime.ElapsedGameTime.TotalSeconds;
         blockTimeCounter += (float)gameTime.ElapsedGameTime.TotalSeconds;
+        currentGameTime += (float) gameTime.ElapsedGameTime.TotalSeconds;
 
         inputHelper.Update(gameTime);
         gameWorld.HandleInput(gameTime, inputHelper);
@@ -144,7 +153,6 @@ class TetrisGame : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        level = score / 100;
         GraphicsDevice.Clear(Color.White);
         spriteBatch.Begin();
         for (int x = 0; x < TetrisGrid.Width; x++)
@@ -170,7 +178,7 @@ class TetrisGame : Game
         }
         string currentlevel = "Level: " + level.ToString();
         string scorecount = "Score: " + score.ToString();
-        string passedTime = "Time: " + gameTime.TotalGameTime.Seconds.ToString();
+        string passedTime = "Time: " + Math.Floor(currentGameTime).ToString();
         spriteBatch.DrawString(font, currentlevel, new Vector2(500, 460), Color.Blue);
         spriteBatch.DrawString(font, scorecount, new Vector2(500, 480), Color.Blue);
         spriteBatch.DrawString(font, passedTime, new Vector2(500, 500), Color.Blue);
