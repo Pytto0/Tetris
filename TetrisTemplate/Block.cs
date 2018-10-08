@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework;
 using System.Diagnostics;
 using System.Linq;
+using System.Collections.Generic;
 
 class Block
 {
@@ -28,10 +29,7 @@ class Block
                     SubBlock temporarySubBlock = new SubBlock(subBlock1.Y + tx - ty, -subBlock1.X + tx + ty, subBlock1.Color);
 
                     if (temporarySubBlock.IsInSubBlock(subBlock2) || !temporarySubBlock.IsInBounds())
-                    {
-                        return false;
-                    }
-
+                    { return false; }
                     temporarySubBlock = null;
                 }
             }
@@ -39,9 +37,52 @@ class Block
         return true;
     }
 
+    public bool IsSubBlockAtPosition(int x, int y)
+    {
+        foreach (SubBlock subBlock in TetrisGame.allSubBlocks)
+        {
+            if (subBlock.X == x && subBlock.Y == y)
+            { return true; }
+            else { return false; }
+        }
+        return false;
+    }
+
+    public bool IsRowFull(int y)
+    {
+        for (int i = 0; i < 10; i++)
+        {
+            if (!IsSubBlockAtPosition(i, y))
+            { return false; }
+        }
+        return true;
+    }
+
+    public List<int> GetAllRow()
+    {
+        List<int> Rows = new List<int>();
+        {
+            for (int y = 0; y < 20; y++)
+            {
+                if (IsRowFull(y))
+                { Rows.Add(y); }
+            }
+            return Rows;
+        }
+    }
+
+    public void ClearRow()
+    {
+        List<int> allFullRows = GetAllRow();
+        foreach(int rows in allFullRows)
+        {
+            allFullRows.Clear();
+        }
+    }
+
     public void Turn()
     {
-        foreach(SubBlock subBlock in subBlockArray)
+        foreach (SubBlock subBlock in subBlockArray)
         {
             SubBlock turnBlock = GetCurrentTurnBlock();
             int x = subBlock.X;
@@ -56,7 +97,7 @@ class Block
 
     public bool IsInBounds()
     {
-        foreach(SubBlock subBlock in subBlockArray)
+        foreach (SubBlock subBlock in subBlockArray)
         {
             if (!subBlock.IsInBounds())
             {
@@ -68,9 +109,9 @@ class Block
 
     public bool IsThisInSubBlock(SubBlock subBlock)
     {
-        foreach(SubBlock subBlock2 in subBlockArray)
+        foreach (SubBlock subBlock2 in subBlockArray)
         {
-            if(subBlock.IsInSubBlock(subBlock2))
+            if (subBlock.IsInSubBlock(subBlock2))
             {
                 return true;
             }
@@ -80,14 +121,12 @@ class Block
 
     public bool CanMoveTo(int xChange, int yChange)
     {
-        foreach(SubBlock subBlock in subBlockArray)
+        foreach (SubBlock subBlock in subBlockArray)
         {
             SubBlock changedSubBlock = new SubBlock(subBlock.X + xChange, subBlock.Y + yChange, subBlock.Color);
             //Debug.WriteLine("subBlockX: " + subBlock.X + "changedSubBlock: " + changedSubBlock.X);
             if (changedSubBlock.X < 0 || changedSubBlock.X >= TetrisGrid.Width || changedSubBlock.Y >= TetrisGrid.Height)
-            {
-                return false;
-            }
+            { return false; }
             if (TetrisGame.allSubBlocks.ToArray().Length > 0)
             {
                 foreach (SubBlock fallenSubBlock in TetrisGame.allSubBlocks)
@@ -102,12 +141,13 @@ class Block
 
     public void MoveTo(int xChange, int yChange)
     {
-        foreach(SubBlock subBlock in subBlockArray)
+        foreach (SubBlock subBlock in subBlockArray)
         {
             subBlock.X += xChange;
             subBlock.Y += yChange;
         }
     }
+
     public SubBlock GetCurrentTurnBlock()
     {
         switch (Form)

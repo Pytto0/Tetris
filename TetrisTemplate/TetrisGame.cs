@@ -25,7 +25,7 @@ class TetrisGame : Game
     /// </summary>
     public static ContentManager ContentManager { get; private set; }
     public static List<SubBlock> allSubBlocks { get; private set; } //we willen dit alleenmaar vanuit deze klasse kunnen aanpassen (opvragen mag altijd).
-    public Block currentBlock;
+    public Block currentBlock, nextBlock;
     /// <summary>
     /// A static reference to the width and height of the screen.
     /// </summary>
@@ -95,10 +95,25 @@ class TetrisGame : Game
         currentBlock = null;
     }
 
+    /*public void FilledRow()
+    {
+        foreach (SubBlock subBlock in allSubBlocks)
+        {
+            for(int y = 0; y < 20; y++)
+            {
+                for (int x = 0; x < 10; x++)
+                {
+                    if(subBlock.X == x)
+                    { Debug.WriteLine(subBlock.X); }
+                }
+            }
+        }
+    }*/
+
     protected override void Update(GameTime gameTime)
     {
         level = (int) (Math.Floor((double) (score/100)) + 1);
-        if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Space))
+        if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Space) || IsGameOver())
             Reset();
         if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Escape))
              Exit();
@@ -120,26 +135,25 @@ class TetrisGame : Game
             if (currentBlock != null)
             {
                 if (currentBlock.CanMoveTo(0, 1))
-                {
-                    currentBlock.MoveTo(0, 1);
-                }
+                { currentBlock.MoveTo(0, 1); }
                 else
                 {
                     currentBlock.AddToSubBlocks();
-                    score += 10; //Change this to 30 if you want to debug.
+                    score += 10; //Verander dit naar 30 voor debugging zodat je niet te lang hoeft te wachten om de acceleratie te ervaren.
                     //Debug.WriteLine("The current falling block speed is: " + downTimeCounter);
+                    //FilledRow();
                     currentBlock = null;
                 }
             }
-        }
-        if (IsGameOver())
-        {
-            Reset();
         }
         if(blockWaitTime <= blockTimeCounter && currentBlock == null)
         {
             Random rnd = new Random();
             currentBlock = new Block(4, -3, rnd.Next(0, 7));
+            /*nextBlock = new Block(4, -3, rnd.Next(0, 7));
+            currentBlock = nextBlock;*/
+            //G: Ik moet dus ervoor zorgen dat nextBlock als eerste wordt gezien...
+            //...maar dan laadt de currentBlock niet en wordt het niet null.
             blockTimeCounter = 0;
         }
         downTimeCounter += (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -158,23 +172,25 @@ class TetrisGame : Game
         for (int x = 0; x < TetrisGrid.Width; x++)
         {
             for (int y = 0; y < TetrisGrid.Height; y++)
-            {
-                spriteBatch.Draw(emptyCell, new Vector2(x * emptyCell.Width, y * emptyCell.Height), Color.White);
-            }
+            { spriteBatch.Draw(emptyCell, new Vector2(x * emptyCell.Width, y * emptyCell.Height), Color.White); }
         }
         if(currentBlock != null)
         {
             foreach (SubBlock subBlock in currentBlock.subBlockArray)
+            { spriteBatch.Draw(emptyCell, new Vector2(subBlock.X * emptyCell.Width, subBlock.Y * emptyCell.Height), subBlock.Color); }
+            /*foreach (SubBlock subBlock in nextBlock.subBlockArray)
             {
-                spriteBatch.Draw(emptyCell, new Vector2(subBlock.X * emptyCell.Width, subBlock.Y * emptyCell.Height), subBlock.Color);
-            }
+                spriteBatch.Draw(emptyCell, new Vector2(400, 20), subBlock.Color);
+            }*/
+            //G: Het kan niet afhankelijk van de coordinaten subBlock zijn, want dan beinvloedt het ook de currentBlock.
+            //Maar het mag ook niet een nieuwe Vector2 zijn omdat het geen array bevat voor de coordinaten van de blokken.
+            //Misschien moet ik de currentBlock als het ware klonen, maar ik weet niet meer hoe dat moet...
+            //Ook ging het de laatste (en eerste) keer mis toen wij een subBlock kloon wilde maken...
         }
         if (allSubBlocks.ToArray().Length > 0)
         {
             foreach (SubBlock subBlock in allSubBlocks)
-            {
-                spriteBatch.Draw(emptyCell, new Vector2(subBlock.X * emptyCell.Width, subBlock.Y * emptyCell.Height), subBlock.Color);
-            }
+            { spriteBatch.Draw(emptyCell, new Vector2(subBlock.X * emptyCell.Width, subBlock.Y * emptyCell.Height), subBlock.Color); }
         }
         string currentlevel = "Level: " + level.ToString();
         string scorecount = "Score: " + score.ToString();
