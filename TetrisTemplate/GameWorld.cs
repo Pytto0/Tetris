@@ -48,6 +48,18 @@ class GameWorld
         grid = new TetrisGrid();
     }
 
+    public static SubBlock GetSubBlockAtPosition(int x, int y)
+    {
+        foreach(SubBlock subBlock in TetrisGame.allSubBlocks)
+        {
+            if(subBlock.X == x && subBlock.Y == y)
+            {
+                return subBlock;
+            }
+        }
+        return null;
+    }
+
     public void HandleInput(GameTime gameTime, InputHelper inputHelper)
     {
     }

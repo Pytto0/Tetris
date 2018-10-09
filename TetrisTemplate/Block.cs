@@ -37,48 +37,18 @@ class Block
         return true;
     }
 
-    public bool IsSubBlockAtPosition(int x, int y)
+    /*public bool IsSubBlockAtPosition(int x, int y)
     {
         foreach (SubBlock subBlock in TetrisGame.allSubBlocks)
         {
-            if (subBlock.X == x && subBlock.Y == y)
+            if (subBlock.IsInSubBlock(new SubBlock(x, y, Color.White)))
             { return true; }
             else { return false; }
         }
         return false;
-    }
+    } */
 
-    public bool IsRowFull(int y)
-    {
-        for (int i = 0; i < 10; i++)
-        {
-            if (!IsSubBlockAtPosition(i, y))
-            { return false; }
-        }
-        return true;
-    }
 
-    public List<int> GetAllRow()
-    {
-        List<int> Rows = new List<int>();
-        {
-            for (int y = 0; y < 20; y++)
-            {
-                if (IsRowFull(y))
-                { Rows.Add(y); }
-            }
-            return Rows;
-        }
-    }
-
-    public void ClearRow()
-    {
-        List<int> allFullRows = GetAllRow();
-        foreach(int rows in allFullRows)
-        {
-            allFullRows.Clear();
-        }
-    }
 
     public void Turn()
     {

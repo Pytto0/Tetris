@@ -40,6 +40,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ArrayHelper.cs" />
+    <Compile Include="SubBlockOperations.cs" />
     <Compile Include="SubBlock.cs" />
     <Compile Include="GameWorld.cs" />
     <Compile Include="InputHelper.cs" />

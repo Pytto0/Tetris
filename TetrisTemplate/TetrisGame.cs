@@ -139,6 +139,16 @@ class TetrisGame : Game
                 else
                 {
                     currentBlock.AddToSubBlocks();
+                    List<int> YCoordinates = SubBlockOperations.GetAllRowsYCoordinates();
+                    foreach(int y in YCoordinates)
+                    {
+                        if (SubBlockOperations.IsRowFull(y))
+                        {
+                            SubBlockOperations.ClearRow(y);
+                            score += 100;
+                        }
+                    }
+              
                     score += 10; //Verander dit naar 30 voor debugging zodat je niet te lang hoeft te wachten om de acceleratie te ervaren.
                     //Debug.WriteLine("The current falling block speed is: " + downTimeCounter);
                     //FilledRow();
@@ -187,7 +197,7 @@ class TetrisGame : Game
             //Misschien moet ik de currentBlock als het ware klonen, maar ik weet niet meer hoe dat moet...
             //Ook ging het de laatste (en eerste) keer mis toen wij een subBlock kloon wilde maken...
         }
-        if (allSubBlocks.ToArray().Length > 0)
+        if (allSubBlocks.Count > 0)
         {
             foreach (SubBlock subBlock in allSubBlocks)
             { spriteBatch.Draw(emptyCell, new Vector2(subBlock.X * emptyCell.Width, subBlock.Y * emptyCell.Height), subBlock.Color); }
