@@ -25,7 +25,7 @@ class TetrisGame : Game
     /// </summary>
     public static ContentManager ContentManager { get; private set; }
     public static List<SubBlock> allSubBlocks { get; private set; } //we willen dit alleenmaar vanuit deze klasse kunnen aanpassen (opvragen mag altijd).
-    public Block currentBlock, nextBlock;
+    public Block currentBlock, clearedBlock;
     /// <summary>
     /// A static reference to the width and height of the screen.
     /// </summary>
@@ -145,7 +145,16 @@ class TetrisGame : Game
                         if (SubBlockOperations.IsRowFull(y))
                         {
                             SubBlockOperations.ClearRow(y);
-                            score += 100;
+                            foreach (SubBlock allSubBlock in allSubBlocks)
+                            {
+                                for (int i = 0; i < y; i++)
+                                {
+                                    List<SubBlock> rowSubBlocks = SubBlockOperations.GetRowSubBlocks(i);
+                                    //rowSubBlocks.Fall(1); //Ik kan niet de gegevens van List<SubBlock> halen om de Y-coordinaat te veranderen.
+                                    Debug.WriteLine("Falling");
+                                }
+                            }
+                            score += 30;
                         }
                     }
               
@@ -156,7 +165,7 @@ class TetrisGame : Game
                 }
             }
         }
-        if(blockWaitTime <= blockTimeCounter && currentBlock == null)
+        if (blockWaitTime <= blockTimeCounter && currentBlock == null)
         {
             Random rnd = new Random();
             currentBlock = new Block(4, -3, rnd.Next(0, 7));

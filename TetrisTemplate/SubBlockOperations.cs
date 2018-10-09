@@ -58,6 +58,11 @@ class SubBlockOperations
         }
 
     }
-
+    public void Fall(int yChange)
+    {
+        foreach (SubBlock fallBlock in TetrisGame.allSubBlocks)
+            if (fallBlock.Y < TetrisGrid.Height)
+            { fallBlock.Y += yChange; }
+    }
 }
 

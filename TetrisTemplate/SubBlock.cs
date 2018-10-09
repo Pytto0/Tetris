@@ -28,7 +28,6 @@ class SubBlock
             return true;
         }
         return false;
-    } 
-
+    }
 }
 
