@@ -1,10 +1,8 @@
-﻿
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 
-class SubBlockOperations
+static class SubBlockOperations
 {
-
     public static List<SubBlock> GetRowSubBlocks(int y)
     {
         List<SubBlock> subBlockList = new List<SubBlock>();
@@ -16,21 +14,10 @@ class SubBlockOperations
         return subBlockList;
     }
 
-    /*public static void RemoveSubBlockAtPosition(int x, int y)
-    {
-        foreach(SubBlock subBlock in TetrisGame.allSubBlocks)
-        {
-            if(subBlock.X == x && subBlock.Y == y)
-            {
-                TetrisGame.allSubBlocks.Remove(subBlock);
-            }
-        }
-    } */
-
-
     public static bool IsRowFull(int y)
     {
-        if (GetRowSubBlocks(y).Count == TetrisGrid.Width) //als er evenveel blokjes in deze rij zitten als de lengte van een rij, dan hebben we een volle rij
+        if (GetRowSubBlocks(y).Count == TetrisGrid.Width)
+            //Als er evenveel blokjes in deze rij zitten als de lengte van een rij, dan hebben we een volle rij.
             return true;
         else
             return false;
@@ -53,16 +40,14 @@ class SubBlockOperations
     {
         List<SubBlock> rowSubBlocks = GetRowSubBlocks(y);
         foreach(SubBlock subBlock in rowSubBlocks)
-        {
-            TetrisGame.allSubBlocks.Remove(subBlock);
-        }
-
+        { TetrisGame.allSubBlocks.Remove(subBlock); }
     }
-    public void Fall(int yChange)
+
+    public static void Fall(int yRow)
     {
         foreach (SubBlock fallBlock in TetrisGame.allSubBlocks)
-            if (fallBlock.Y < TetrisGrid.Height)
-            { fallBlock.Y += yChange; }
+            if (fallBlock.Y < yRow)
+            { fallBlock.Y += 1; }
     }
 }
 

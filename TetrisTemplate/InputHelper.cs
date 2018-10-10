@@ -22,7 +22,6 @@ class InputHelper
         currentMouseState = Mouse.GetState();
         currentKeyboardState = Keyboard.GetState();
     }
-
     /// <summary>
     /// Gets the current position of the mouse cursor.
     /// </summary>

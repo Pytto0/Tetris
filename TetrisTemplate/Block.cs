@@ -1,5 +1,4 @@
-﻿
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 using System.Diagnostics;
 using System.Linq;
 using System.Collections.Generic;
@@ -37,19 +36,6 @@ class Block
         return true;
     }
 
-    /*public bool IsSubBlockAtPosition(int x, int y)
-    {
-        foreach (SubBlock subBlock in TetrisGame.allSubBlocks)
-        {
-            if (subBlock.IsInSubBlock(new SubBlock(x, y, Color.White)))
-            { return true; }
-            else { return false; }
-        }
-        return false;
-    } */
-
-
-
     public void Turn()
     {
         foreach (SubBlock subBlock in subBlockArray)
@@ -70,23 +56,9 @@ class Block
         foreach (SubBlock subBlock in subBlockArray)
         {
             if (!subBlock.IsInBounds())
-            {
-                return false;
-            }
+            { return false; }
         }
         return true;
-    }
-
-    public bool IsThisInSubBlock(SubBlock subBlock)
-    {
-        foreach (SubBlock subBlock2 in subBlockArray)
-        {
-            if (subBlock.IsInSubBlock(subBlock2))
-            {
-                return true;
-            }
-        }
-        return false;
     }
 
     public bool CanMoveTo(int xChange, int yChange)
@@ -139,26 +111,6 @@ class Block
         }
     }
 
-    /*public bool CanFallDown()
-    {
-        foreach (SubBlock subBlock1 in subBlockArray)
-        {
-            //Debug.WriteLine("test2: " + TetrisGame.allSubBlocks.ToArray().Length);
-            if (TetrisGame.allSubBlocks.ToArray().Length > 0)
-            {
-                foreach (SubBlock subBlock2 in TetrisGame.allSubBlocks)
-                {
-                    //Debug.WriteLine("(" + subBlock1.X + "," + (subBlock1.Y + 1) + ")" + " (" + subBlock2.X + "," + subBlock2.Y + ")");
-                    if (subBlock1.X == subBlock2.X && (subBlock1.Y + 1) == subBlock2.Y)
-                        return false;
-                }
-            }
-            if (subBlock1.Y >= 19)
-                return false;
-        }
-        return true;
-    } */
-
     public void AddToSubBlocks()
     {
         foreach(SubBlock subBlock in subBlockArray)
@@ -169,15 +121,7 @@ class Block
         }
     }
 
-    /*public void BlockFallDown() //allFallenSubBlocks: een lijst van 1 bij 1 blokjes die of op andere blokjes staan of op de grond staan
-      {
-        foreach (SubBlock subBlock in subBlockArray)
-        {
-            subBlock.Y += 1;
-        }
-    } */
-
-    public SubBlock[] GenerateBlock(int form, int gridX, int gridY) //de eerste subarragridY is ALTIJD de vorm (en dat is dan weer de kleurcode).
+    public SubBlock[] GenerateBlock(int form, int gridX, int gridY) //de eerste subarragrid.Y is ALTIJD de vorm (en dat is dan weer de kleurcode).
         {
             Color c = Color.White;
             switch (form)

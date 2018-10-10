@@ -6,6 +6,7 @@ using System.Collections;
 using System.Diagnostics;
 using System.Linq;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework.Input;
 
 class TetrisGame : Game
 {
@@ -17,6 +18,7 @@ class TetrisGame : Game
     SpriteFont font;
     int[][][] allBlocks = new int[0][][];
     public int score, level;
+    const int amountOfBlockForms = 7;
     const float constBlockWaitTime = 1f, constDownWaitTime = 0.5f;
     float blockWaitTime = constBlockWaitTime, blockTimeCounter, downWaitTime = constDownWaitTime, downTimeCounter, currentGameTime = 0f;
 
@@ -25,7 +27,7 @@ class TetrisGame : Game
     /// </summary>
     public static ContentManager ContentManager { get; private set; }
     public static List<SubBlock> allSubBlocks { get; private set; } //we willen dit alleenmaar vanuit deze klasse kunnen aanpassen (opvragen mag altijd).
-    public Block currentBlock, clearedBlock;
+    public Block currentBlock, nextBlock;
     /// <summary>
     /// A static reference to the width and height of the screen.
     /// </summary>
@@ -37,7 +39,7 @@ class TetrisGame : Game
         TetrisGame game = new TetrisGame();
         game.Run();
     }
-
+    
     public TetrisGame()
     {        
         // initialize the graphics device
@@ -60,6 +62,7 @@ class TetrisGame : Game
         tetrisGrid = new TetrisGrid();
 
         allSubBlocks = new List<SubBlock> { };
+        nextBlock = new Block(15, 3, (new Random()).Next(0, amountOfBlockForms));
         List<int[][]> fallenSubBlockList = new List<int[][]>(); //lijst van alle blokjes die momenteel stil staan en niet meer kunnen bewgen
         //int[][] currentBlock = new int[1][]; //lijst van alle grote blokken die momenteel stil staan.
     }
@@ -95,43 +98,53 @@ class TetrisGame : Game
         currentBlock = null;
     }
 
-    /*public void FilledRow()
+    public void ExecuteKeyOrders()
     {
-        foreach (SubBlock subBlock in allSubBlocks)
+        KeyboardState kbs = Keyboard.GetState();
+        Keys[] keys = kbs.GetPressedKeys();
+        foreach (Keys key in keys)
         {
-            for(int y = 0; y < 20; y++)
+            switch (key)
             {
-                for (int x = 0; x < 10; x++)
-                {
-                    if(subBlock.X == x)
-                    { Debug.WriteLine(subBlock.X); }
-                }
+                case Keys.Space:
+                    Reset();
+                    break;
+                case Keys.Escape:
+                    Exit();
+                    break;
             }
         }
-    }*/
+    }
+
+
 
     protected override void Update(GameTime gameTime)
     {
         level = (int) (Math.Floor((double) (score/100)) + 1);
-        if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Space) || IsGameOver())
+        ExecuteKeyOrders();
+        /*if (inputHelper.KeyPressed(Keys.Space) || IsGameOver())
             Reset();
-        if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Escape))
-             Exit();
-        if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Up))
+        if (inputHelper.KeyPressed(Keys.Escape))
+             Exit(); */
+        if (inputHelper.KeyPressed(Keys.Up))
             if(currentBlock != null && currentBlock.CanTurn()) 
                 currentBlock.Turn();
-        if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Left))
+        if (inputHelper.KeyPressed(Keys.Left))
             if (currentBlock != null && currentBlock.CanMoveTo(-1, 0))
                 currentBlock.MoveTo(-1, 0);
-        if (inputHelper.KeyPressed(Microsoft.Xna.Framework.Input.Keys.Right))
+        if (inputHelper.KeyPressed(Keys.Right))
             if (currentBlock != null && currentBlock.CanMoveTo(1, 0))
                 currentBlock.MoveTo(1, 0);
-        if (inputHelper.KeyDown(Microsoft.Xna.Framework.Input.Keys.Down))
+        if (inputHelper.KeyDown(Keys.Down))
             if (currentBlock != null)
                 downTimeCounter += 4*(float)gameTime.ElapsedGameTime.TotalSeconds;
+
         if (downWaitTime <= downTimeCounter)
         {
-            downTimeCounter = level * 0.03f;
+            if (level < 15)
+            { downTimeCounter = level * 0.03f; }
+            else
+            { downTimeCounter = 15 * 0.03f; }
             if (currentBlock != null)
             {
                 if (currentBlock.CanMoveTo(0, 1))
@@ -145,15 +158,7 @@ class TetrisGame : Game
                         if (SubBlockOperations.IsRowFull(y))
                         {
                             SubBlockOperations.ClearRow(y);
-                            foreach (SubBlock allSubBlock in allSubBlocks)
-                            {
-                                for (int i = 0; i < y; i++)
-                                {
-                                    List<SubBlock> rowSubBlocks = SubBlockOperations.GetRowSubBlocks(i);
-                                    //rowSubBlocks.Fall(1); //Ik kan niet de gegevens van List<SubBlock> halen om de Y-coordinaat te veranderen.
-                                    Debug.WriteLine("Falling");
-                                }
-                            }
+                            SubBlockOperations.Fall(y);
                             score += 30;
                         }
                     }
@@ -165,16 +170,15 @@ class TetrisGame : Game
                 }
             }
         }
-        if (blockWaitTime <= blockTimeCounter && currentBlock == null)
+
+        if (blockWaitTime <= blockTimeCounter && currentBlock == null && !IsGameOver())
         {
             Random rnd = new Random();
-            currentBlock = new Block(4, -3, rnd.Next(0, 7));
-            /*nextBlock = new Block(4, -3, rnd.Next(0, 7));
-            currentBlock = nextBlock;*/
-            //G: Ik moet dus ervoor zorgen dat nextBlock als eerste wordt gezien...
-            //...maar dan laadt de currentBlock niet en wordt het niet null.
+            currentBlock = new Block(4, -3, nextBlock.Form);
+            nextBlock = new Block(15, 3, rnd.Next(0, 7));
             blockTimeCounter = 0;
         }
+
         downTimeCounter += (float)gameTime.ElapsedGameTime.TotalSeconds;
         blockTimeCounter += (float)gameTime.ElapsedGameTime.TotalSeconds;
         currentGameTime += (float) gameTime.ElapsedGameTime.TotalSeconds;
@@ -197,14 +201,8 @@ class TetrisGame : Game
         {
             foreach (SubBlock subBlock in currentBlock.subBlockArray)
             { spriteBatch.Draw(emptyCell, new Vector2(subBlock.X * emptyCell.Width, subBlock.Y * emptyCell.Height), subBlock.Color); }
-            /*foreach (SubBlock subBlock in nextBlock.subBlockArray)
-            {
-                spriteBatch.Draw(emptyCell, new Vector2(400, 20), subBlock.Color);
-            }*/
-            //G: Het kan niet afhankelijk van de coordinaten subBlock zijn, want dan beinvloedt het ook de currentBlock.
-            //Maar het mag ook niet een nieuwe Vector2 zijn omdat het geen array bevat voor de coordinaten van de blokken.
-            //Misschien moet ik de currentBlock als het ware klonen, maar ik weet niet meer hoe dat moet...
-            //Ook ging het de laatste (en eerste) keer mis toen wij een subBlock kloon wilde maken...
+            foreach (SubBlock subBlock in nextBlock.subBlockArray)
+            { spriteBatch.Draw(emptyCell, new Vector2(subBlock.X * emptyCell.Width, subBlock.Y * emptyCell.Height), subBlock.Color); }
         }
         if (allSubBlocks.Count > 0)
         {

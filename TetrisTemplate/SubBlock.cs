@@ -1,5 +1,4 @@
-﻿
-using Microsoft.Xna.Framework;
+﻿using Microsoft.Xna.Framework;
 
 class SubBlock
 {
@@ -16,9 +15,7 @@ class SubBlock
     public bool IsInBounds()
     {
         if (X < 0 || X >= TetrisGrid.Width || Y >= TetrisGrid.Height)
-        {
-            return false;
-        }
+        { return false; }
         return true;
     }
     public bool IsInSubBlock(SubBlock subBlock)
@@ -29,5 +26,9 @@ class SubBlock
         }
         return false;
     }
+    /*public bool CanMoveTo(int x, int y)
+    {
+        return null;
+    }*/
 }
 
