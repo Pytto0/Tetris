@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using System.Collections.Generic;
 
 /// <summary>
 /// A class for helping out with input-related tasks, such as checking if a key or mouse button has been pressed.
@@ -26,9 +27,7 @@ class InputHelper
     /// Gets the current position of the mouse cursor.
     /// </summary>
     public Vector2 MousePosition
-    {
-        get { return new Vector2(currentMouseState.X, currentMouseState.Y); }
-    }
+    { get { return new Vector2(currentMouseState.X, currentMouseState.Y); } }
 
     /// <summary>
     /// Returns whether or not the left mouse button has just been pressed.
@@ -47,6 +46,17 @@ class InputHelper
     public bool KeyPressed(Keys k)
     {
         return currentKeyboardState.IsKeyDown(k) && previousKeyboardState.IsKeyUp(k);
+    }
+
+    public List<Keys> GetPressedKeys()
+    {
+        List<Keys> l = new List<Keys>();
+        foreach(Keys k in currentKeyboardState.GetPressedKeys())
+        {
+            if (KeyPressed(k))
+                l.Add(k);
+        }
+        return l;
     }
 
     /// <summary>

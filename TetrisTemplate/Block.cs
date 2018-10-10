@@ -56,12 +56,12 @@ class Block
         foreach (SubBlock subBlock in subBlockArray)
         {
             if (!subBlock.IsInBounds())
-            { return false; }
+                return false;
         }
         return true;
     }
 
-    public bool CanMoveTo(int xChange, int yChange)
+    public bool CanMoveRelativeTo(int xChange, int yChange)
     {
         foreach (SubBlock subBlock in subBlockArray)
         {
@@ -73,7 +73,7 @@ class Block
             {
                 foreach (SubBlock fallenSubBlock in TetrisGame.allSubBlocks)
                 {
-                    if (changedSubBlock.IsInSubBlock(fallenSubBlock))
+                    if (SubBlockOperations.IsSubBlockAtPosition(fallenSubBlock.X, subBlock.Y))
                         return false;
                 }
             }
@@ -81,7 +81,7 @@ class Block
         return true;
     }
 
-    public void MoveTo(int xChange, int yChange)
+    public void MoveRelativeTo(int xChange, int yChange)
     {
         foreach (SubBlock subBlock in subBlockArray)
         {
@@ -113,49 +113,49 @@ class Block
 
     public void AddToSubBlocks()
     {
-        foreach(SubBlock subBlock in subBlockArray)
+        foreach (SubBlock subBlock in subBlockArray)
         {
             //Debug.WriteLine("TOTALLENGTH: " + TetrisGame.allSubBlocks.ToArray().Length + " x length: " + subBlock.X + " y length: " + subBlock.Y);
             TetrisGame.allSubBlocks.Add(subBlock);
-            
+
         }
     }
 
     public SubBlock[] GenerateBlock(int form, int gridX, int gridY) //de eerste subarragrid.Y is ALTIJD de vorm (en dat is dan weer de kleurcode).
+    {
+        Color c = Color.White;
+        switch (form)
         {
-            Color c = Color.White;
-            switch (form)
-            {
-                case 0:
-                    c = Color.Yellow;
-                   // turnBlock = new SubBlock(gridX, 1 + gridY, c);
-                    return new SubBlock[] { new SubBlock(gridX, gridY, c), new SubBlock(gridX, 1 + gridY, c), new SubBlock(gridX, 2 + gridY, c), new SubBlock(gridX, 3 + gridY, c) }; //vierblokkige staaf
-                case 1:
-                    c = Color.Blue;
-                   // turnBlock = new SubBlock(1 + gridX, 1 + gridY, c);
-                    return new SubBlock[] { new SubBlock(1 + gridX, gridY, c), new SubBlock(2 + gridX, gridY, c), new SubBlock(gridX, 1 + gridY, c), new SubBlock(1 + gridX, 1 + gridY, c) }; //omgekeerde "Z"
-                case 2:
-                    c = Color.Red;
-                    //turnBlock = new SubBlock(1 + gridX, gridY, c);
-                    return new SubBlock[] { new SubBlock(gridX, gridY, c), new SubBlock(1 + gridX, gridY, c), new SubBlock(1 + gridX, 1 + gridY, c), new SubBlock(2 + gridX, 1 + gridY, c) }; //"Z"
-                case 3:
-                    c = Color.Brown;
-                    //turnBlock = new SubBlock(gridX, 1 + gridY, c);
-                    return new SubBlock[] { new SubBlock(2 + gridX, gridY, c), new SubBlock(gridX, 1 + gridY, c), new SubBlock(1 + gridX, 1 + gridY, c), new SubBlock(2 + gridX, 1 + gridY, c) }; //"L"
-                case 4:
-                    c = Color.Green;
-                    //turnBlock = new SubBlock(gridX, 1 + gridY, c);
-                    return new SubBlock[] { new SubBlock(gridX, gridY, c), new SubBlock(gridX, 1 + gridY, c), new SubBlock(1 + gridX, 1 + gridY, c), new SubBlock(2 + gridX, 1 + gridY, c) }; //omgekeerde "L"
-                case 5:
-                    c = Color.Purple;
-                    //turnBlock = new SubBlock(1 + gridX, 1 + gridY, c);
-                    return new SubBlock[] { new SubBlock(1 + gridX, gridY, c), new SubBlock(gridX, 1 + gridY, c), new SubBlock(1 + gridX, 1 + gridY, c), new SubBlock(2 + gridX, 1 + gridY, c) }; //"T"
-                default:
-                    c = Color.Aqua;
-                    //turnBlock = new SubBlock(gridX, gridY, c);
-                    return new SubBlock[] { new SubBlock(gridX, gridY, c), new SubBlock(1 + gridX, gridY, c), new SubBlock(gridX, 1 + gridY, c), new SubBlock(1 + gridX, 1 + gridY, c) }; //vierkant blok
-            }
+            case 0:
+                c = Color.Yellow;
+                // turnBlock = new SubBlock(gridX, 1 + gridY, c);
+                return new SubBlock[] { new SubBlock(gridX, gridY, c), new SubBlock(gridX, 1 + gridY, c), new SubBlock(gridX, 2 + gridY, c), new SubBlock(gridX, 3 + gridY, c) }; //vierblokkige staaf
+            case 1:
+                c = Color.Blue;
+                // turnBlock = new SubBlock(1 + gridX, 1 + gridY, c);
+                return new SubBlock[] { new SubBlock(1 + gridX, gridY, c), new SubBlock(2 + gridX, gridY, c), new SubBlock(gridX, 1 + gridY, c), new SubBlock(1 + gridX, 1 + gridY, c) }; //omgekeerde "Z"
+            case 2:
+                c = Color.Red;
+                //turnBlock = new SubBlock(1 + gridX, gridY, c);
+                return new SubBlock[] { new SubBlock(gridX, gridY, c), new SubBlock(1 + gridX, gridY, c), new SubBlock(1 + gridX, 1 + gridY, c), new SubBlock(2 + gridX, 1 + gridY, c) }; //"Z"
+            case 3:
+                c = Color.Brown;
+                //turnBlock = new SubBlock(gridX, 1 + gridY, c);
+                return new SubBlock[] { new SubBlock(2 + gridX, gridY, c), new SubBlock(gridX, 1 + gridY, c), new SubBlock(1 + gridX, 1 + gridY, c), new SubBlock(2 + gridX, 1 + gridY, c) }; //"L"
+            case 4:
+                c = Color.Green;
+                //turnBlock = new SubBlock(gridX, 1 + gridY, c);
+                return new SubBlock[] { new SubBlock(gridX, gridY, c), new SubBlock(gridX, 1 + gridY, c), new SubBlock(1 + gridX, 1 + gridY, c), new SubBlock(2 + gridX, 1 + gridY, c) }; //omgekeerde "L"
+            case 5:
+                c = Color.Purple;
+                //turnBlock = new SubBlock(1 + gridX, 1 + gridY, c);
+                return new SubBlock[] { new SubBlock(1 + gridX, gridY, c), new SubBlock(gridX, 1 + gridY, c), new SubBlock(1 + gridX, 1 + gridY, c), new SubBlock(2 + gridX, 1 + gridY, c) }; //"T"
+            default:
+                c = Color.Aqua;
+                //turnBlock = new SubBlock(gridX, gridY, c);
+                return new SubBlock[] { new SubBlock(gridX, gridY, c), new SubBlock(1 + gridX, gridY, c), new SubBlock(gridX, 1 + gridY, c), new SubBlock(1 + gridX, 1 + gridY, c) }; //vierkant blok
         }
     }
+}
 
 

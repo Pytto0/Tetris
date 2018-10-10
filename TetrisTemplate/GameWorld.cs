@@ -20,9 +20,7 @@ class GameWorld
     /// <summary>
     /// The random-number generator of the game.
     /// </summary>
-    public static Random Random { get { return random; } }
-    static Random random;
-
+    public static Random Random { get { return new Random(); } }
     /// <summary>
     /// The main font of the game.
     /// </summary>
@@ -40,11 +38,9 @@ class GameWorld
 
     public GameWorld()
     {
-        random = new Random();
+        Random random = new Random();
         gameState = GameState.Playing;
-
         font = TetrisGame.ContentManager.Load<SpriteFont>("SpelFont");
-
         grid = new TetrisGrid();
     }
 
@@ -53,9 +49,7 @@ class GameWorld
         foreach(SubBlock subBlock in TetrisGame.allSubBlocks)
         {
             if(subBlock.X == x && subBlock.Y == y)
-            {
                 return subBlock;
-            }
         }
         return null;
     }

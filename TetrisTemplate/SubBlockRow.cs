@@ -1,14 +1,14 @@
 ﻿using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 
-static class SubBlockOperations
+static class SubBlockRow
 {
     public static List<SubBlock> GetRowSubBlocks(int y)
     {
         List<SubBlock> subBlockList = new List<SubBlock>();
         for (int x = 0; x < TetrisGrid.Width; x++)
         {
-            if(GameWorld.GetSubBlockAtPosition(x, y) != null)
+            if (GameWorld.GetSubBlockAtPosition(x, y) != null)
                 subBlockList.Add(GameWorld.GetSubBlockAtPosition(x, y));
         }
         return subBlockList;
@@ -30,7 +30,7 @@ static class SubBlockOperations
             for (int y = 0; y < TetrisGrid.Height; y++)
             {
                 if (IsRowFull(y))
-                { Rows.Add(y); }
+                    Rows.Add(y);
             }
             return Rows;
         }
@@ -39,8 +39,8 @@ static class SubBlockOperations
     public static void ClearRow(int y)
     {
         List<SubBlock> rowSubBlocks = GetRowSubBlocks(y);
-        foreach(SubBlock subBlock in rowSubBlocks)
-        { TetrisGame.allSubBlocks.Remove(subBlock); }
+        foreach (SubBlock subBlock in rowSubBlocks)
+            TetrisGame.allSubBlocks.Remove(subBlock);
     }
 
     public static void Fall(int yRow)
@@ -49,5 +49,6 @@ static class SubBlockOperations
             if (fallBlock.Y < yRow)
             { fallBlock.Y += 1; }
     }
+
 }
 

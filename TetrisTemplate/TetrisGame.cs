@@ -58,13 +58,12 @@ class TetrisGame : Game
 
         // create the input helper object
         inputHelper = new InputHelper();
-
         tetrisGrid = new TetrisGrid();
 
         allSubBlocks = new List<SubBlock> { };
         nextBlock = new Block(15, 3, (new Random()).Next(0, amountOfBlockForms));
-        List<int[][]> fallenSubBlockList = new List<int[][]>(); //lijst van alle blokjes die momenteel stil staan en niet meer kunnen bewgen
-        //int[][] currentBlock = new int[1][]; //lijst van alle grote blokken die momenteel stil staan.
+        List<int[][]> fallenSubBlockList = new List<int[][]>(); //Lijst van alle blokjes die momenteel stil staan en niet meer kunnen bewgen
+        //Lijst van alle grote blokken die momenteel stil staan.
     }
 
     protected override void LoadContent()
@@ -86,7 +85,7 @@ class TetrisGame : Game
         }
         return false;
     }
-    
+
     public void Reset()
     {
         score = 0;
@@ -102,81 +101,84 @@ class TetrisGame : Game
     {
         KeyboardState kbs = Keyboard.GetState();
         Keys[] keys = kbs.GetPressedKeys();
-        foreach (Keys key in keys)
+        foreach (Keys key in inputHelper.GetPressedKeys())
         {
             switch (key)
-            {
-                case Keys.Space:
-                    Reset();
+            { 
+                case Keys.Up:
+                    if(currentBlock != null && currentBlock.CanTurn() )
+                        currentBlock.Turn();
                     break;
-                case Keys.Escape:
-                    Exit();
+                case Keys.Right:
+                    if (currentBlock != null && currentBlock.CanMoveRelativeTo(1, 0))
+                        currentBlock.MoveRelativeTo(1, 0);
+                    break;
+                case Keys.Left:
+                    if (currentBlock != null && currentBlock.CanMoveRelativeTo(-1, 0))
+                        currentBlock.MoveRelativeTo(-1, 0);
                     break;
             }
         }
     }
+    public void RemoveFullRows()
+    {
+        List<int> YCoordinates = SubBlockOperations.GetAllRowsYCoordinates();
+        foreach (int y in YCoordinates)
+        {
+            if (SubBlockOperations.IsRowFull(y))
+            {
+                SubBlockOperations.ClearRow(y);
+                SubBlockOperations.Fall(y);
+                score += 30;
+            }
+        }
+    }
 
+    public void BlockFallDown()
+    {
+        if (level < 15)
+            downTimeCounter = level * 0.03f;
+        else
+            downTimeCounter = 15 * 0.03f;
+
+        if (currentBlock.CanMoveRelativeTo(0, 1))
+            currentBlock.MoveRelativeTo(0, 1);
+        else
+        {
+            currentBlock.AddToSubBlocks();
+            score += 10;
+            currentBlock = null;
+            RemoveFullRows();
+        }
+    }
+
+    public void CreateNewBlock()
+    {
+        Random rnd = new Random();
+        currentBlock = new Block(4, -3, nextBlock.Form);
+        nextBlock = new Block(15, 3, rnd.Next(0, amountOfBlockForms));
+        blockTimeCounter = 0;
+    }
 
 
     protected override void Update(GameTime gameTime)
     {
         level = (int) (Math.Floor((double) (score/100)) + 1);
-        ExecuteKeyOrders();
-        /*if (inputHelper.KeyPressed(Keys.Space) || IsGameOver())
+
+        if (inputHelper.KeyPressed(Keys.Space) || IsGameOver())
             Reset();
         if (inputHelper.KeyPressed(Keys.Escape))
-             Exit(); */
-        if (inputHelper.KeyPressed(Keys.Up))
-            if(currentBlock != null && currentBlock.CanTurn()) 
-                currentBlock.Turn();
-        if (inputHelper.KeyPressed(Keys.Left))
-            if (currentBlock != null && currentBlock.CanMoveTo(-1, 0))
-                currentBlock.MoveTo(-1, 0);
-        if (inputHelper.KeyPressed(Keys.Right))
-            if (currentBlock != null && currentBlock.CanMoveTo(1, 0))
-                currentBlock.MoveTo(1, 0);
-        if (inputHelper.KeyDown(Keys.Down))
-            if (currentBlock != null)
-                downTimeCounter += 4*(float)gameTime.ElapsedGameTime.TotalSeconds;
+            Exit();
 
-        if (downWaitTime <= downTimeCounter)
+        if (currentBlock != null)
         {
-            if (level < 15)
-            { downTimeCounter = level * 0.03f; }
-            else
-            { downTimeCounter = 15 * 0.03f; }
-            if (currentBlock != null)
-            {
-                if (currentBlock.CanMoveTo(0, 1))
-                { currentBlock.MoveTo(0, 1); }
-                else
-                {
-                    currentBlock.AddToSubBlocks();
-                    List<int> YCoordinates = SubBlockOperations.GetAllRowsYCoordinates();
-                    foreach(int y in YCoordinates)
-                    {
-                        if (SubBlockOperations.IsRowFull(y))
-                        {
-                            SubBlockOperations.ClearRow(y);
-                            SubBlockOperations.Fall(y);
-                            score += 30;
-                        }
-                    }
-              
-                    score += 10; //Verander dit naar 30 voor debugging zodat je niet te lang hoeft te wachten om de acceleratie te ervaren.
-                    //Debug.WriteLine("The current falling block speed is: " + downTimeCounter);
-                    //FilledRow();
-                    currentBlock = null;
-                }
-            }
-        }
-
-        if (blockWaitTime <= blockTimeCounter && currentBlock == null && !IsGameOver())
-        {
-            Random rnd = new Random();
-            currentBlock = new Block(4, -3, nextBlock.Form);
-            nextBlock = new Block(15, 3, rnd.Next(0, 7));
-            blockTimeCounter = 0;
+            ExecuteKeyOrders();
+            if (downWaitTime <= downTimeCounter)
+                BlockFallDown();
+            if (inputHelper.KeyDown(Keys.Down))
+                downTimeCounter += 4 * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (blockWaitTime <= blockTimeCounter)
+                CreateNewBlock();
         }
 
         downTimeCounter += (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -195,19 +197,19 @@ class TetrisGame : Game
         for (int x = 0; x < TetrisGrid.Width; x++)
         {
             for (int y = 0; y < TetrisGrid.Height; y++)
-            { spriteBatch.Draw(emptyCell, new Vector2(x * emptyCell.Width, y * emptyCell.Height), Color.White); }
+                spriteBatch.Draw(emptyCell, new Vector2(x * emptyCell.Width, y * emptyCell.Height), Color.White);
         }
-        if(currentBlock != null)
+        if (currentBlock != null)
         {
             foreach (SubBlock subBlock in currentBlock.subBlockArray)
-            { spriteBatch.Draw(emptyCell, new Vector2(subBlock.X * emptyCell.Width, subBlock.Y * emptyCell.Height), subBlock.Color); }
+                spriteBatch.Draw(emptyCell, new Vector2(subBlock.X * emptyCell.Width, subBlock.Y * emptyCell.Height), subBlock.Color);
             foreach (SubBlock subBlock in nextBlock.subBlockArray)
-            { spriteBatch.Draw(emptyCell, new Vector2(subBlock.X * emptyCell.Width, subBlock.Y * emptyCell.Height), subBlock.Color); }
+                spriteBatch.Draw(emptyCell, new Vector2(subBlock.X * emptyCell.Width, subBlock.Y * emptyCell.Height), subBlock.Color);
         }
         if (allSubBlocks.Count > 0)
         {
             foreach (SubBlock subBlock in allSubBlocks)
-            { spriteBatch.Draw(emptyCell, new Vector2(subBlock.X * emptyCell.Width, subBlock.Y * emptyCell.Height), subBlock.Color); }
+                spriteBatch.Draw(emptyCell, new Vector2(subBlock.X * emptyCell.Width, subBlock.Y * emptyCell.Height), subBlock.Color);
         }
         string currentlevel = "Level: " + level.ToString();
         string scorecount = "Score: " + score.ToString();
@@ -215,7 +217,8 @@ class TetrisGame : Game
         spriteBatch.DrawString(font, currentlevel, new Vector2(500, 460), Color.Blue);
         spriteBatch.DrawString(font, scorecount, new Vector2(500, 480), Color.Blue);
         spriteBatch.DrawString(font, passedTime, new Vector2(500, 500), Color.Blue);
-        spriteBatch.End(); 
+
+        spriteBatch.End();
         gameWorld.Draw(gameTime, spriteBatch);
     }
 }

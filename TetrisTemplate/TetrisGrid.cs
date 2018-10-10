@@ -32,8 +32,6 @@ class TetrisGrid
         Clear();
     }
 
-
-
     /// <summary>
     /// Draws the grid on the screen.
     /// </summary>

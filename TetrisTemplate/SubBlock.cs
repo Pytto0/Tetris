@@ -12,23 +12,36 @@ class SubBlock
         Y = y;
         Color = c;
     }
+
     public bool IsInBounds()
     {
         if (X < 0 || X >= TetrisGrid.Width || Y >= TetrisGrid.Height)
-        { return false; }
+            return false;
         return true;
     }
-    public bool IsInSubBlock(SubBlock subBlock)
+       
+    public bool CanMoveTo(int x, int y)
     {
-        if (X == subBlock.X && Y == subBlock.Y)
+        foreach (SubBlock subBlock in TetrisGame.allSubBlocks)
         {
-            return true;
+            if (IsSubBlockAtPosition(x, y))
+                return false;
         }
+        return true;
+    }
+
+    public void MoveTo(int x, int y)
+    {
+        X = x;
+        Y = y;
+    }
+
+    public static bool IsSubBlockAtPosition(int x, int y)
+    {
+        foreach (SubBlock subBlock in TetrisGame.allSubBlocks)
+            if (subBlock.X == x && subBlock.Y == y)
+                return true;
         return false;
     }
-    /*public bool CanMoveTo(int x, int y)
-    {
-        return null;
-    }*/
 }
 
