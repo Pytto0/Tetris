@@ -122,13 +122,13 @@ class TetrisGame : Game
     }
     public void RemoveFullRows()
     {
-        List<int> YCoordinates = SubBlockOperations.GetAllRowsYCoordinates();
+        List<int> YCoordinates = SubBlockRow.GetAllRowsYCoordinates();
         foreach (int y in YCoordinates)
         {
-            if (SubBlockOperations.IsRowFull(y))
+            if (SubBlockRow.IsRowFull(y))
             {
-                SubBlockOperations.ClearRow(y);
-                SubBlockOperations.Fall(y);
+                SubBlockRow.ClearRow(y);
+                SubBlockRow.Fall(y);
                 score += 30;
             }
         }

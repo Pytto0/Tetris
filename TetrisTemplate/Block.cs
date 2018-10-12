@@ -73,7 +73,7 @@ class Block
             {
                 foreach (SubBlock fallenSubBlock in TetrisGame.allSubBlocks)
                 {
-                    if (SubBlockOperations.IsSubBlockAtPosition(fallenSubBlock.X, subBlock.Y))
+                    if (SubBlockRow.IsSubBlockAtPosition(fallenSubBlock.X, subBlock.Y))
                         return false;
                 }
             }
