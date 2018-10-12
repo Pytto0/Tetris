@@ -44,15 +44,6 @@ class GameWorld
         grid = new TetrisGrid();
     }
 
-    public static SubBlock GetSubBlockAtPosition(int x, int y)
-    {
-        foreach(SubBlock subBlock in TetrisGame.allSubBlocks)
-        {
-            if(subBlock.X == x && subBlock.Y == y)
-                return subBlock;
-        }
-        return null;
-    }
 
     public void HandleInput(GameTime gameTime, InputHelper inputHelper)
     {
@@ -62,12 +53,19 @@ class GameWorld
     {
     }
 
+
+    public void State()
+    {
+    }
+
     public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
     {
+        //if (state == 1){
         spriteBatch.Begin();
         grid.Draw(gameTime, spriteBatch);
         //spriteBatch.DrawString(font, "Hello!", new Vector2(30*TetrisGrid.Width + 20, 5*TetrisGrid.Height), Color.Blue);
         spriteBatch.End();
+        //}
     }
 
     public void Reset()

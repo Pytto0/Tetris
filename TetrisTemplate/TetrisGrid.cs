@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// A class for representing the Tetris playing grid.
 /// </summary>
-class TetrisGrid
+class TetrisGrid : TetrisGame
 {
     /// The sprite of a single empty cell in the grid.
     Texture2D emptyCell;
@@ -14,6 +14,7 @@ class TetrisGrid
     Vector2 position;
 
     SpriteBatch spriteBatch;
+    List<SubBlock> grid;
 
     /// The number of grid elements in the x-direction.
     public static int Width { get { return 10; } }
@@ -27,9 +28,25 @@ class TetrisGrid
     /// <param name="b"></param>
     public TetrisGrid()
     {
-        //emptyCell = TetrisGame.ContentManager.Load<Texture2D>("block");
+        
         position = Vector2.Zero;
-        Clear();
+        grid = new List<SubBlock>();
+        
+    }
+    
+    
+
+    public void UpdateGrid()
+    {
+        for (int x = 0; x < Width; x++)
+        {
+            for (int y = 0; y < Height; y++)
+            {
+                SubBlock gridBlock = new SubBlock(x, y, Color.Gray);
+                if (SubBlock.GetSubBlockAtPosition(x, y) == null)
+                    grid.Add(gridBlock);
+            }
+        }
     }
 
     /// <summary>
@@ -39,12 +56,19 @@ class TetrisGrid
     /// <param name="spriteBatch">The SpriteBatch used for drawing sprites and text.</param>
     public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
     {
+        UpdateGrid();
+        grid.AddRange(TetrisGame.allSubBlocks);
+        foreach(SubBlock subBlock in grid)
+        {
+            spriteBatch.Draw(emptyCell, new Vector2(subBlock.X * emptyCell.Width, subBlock.Y * emptyCell.Height), subBlock.Color);
+        }
     }
     /// <summary>
     /// Clears the grid.
     /// </summary>
     public void Clear()
     {
+        grid.Clear();
     }
 }
 

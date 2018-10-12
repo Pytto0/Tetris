@@ -13,6 +13,12 @@ class SubBlock
         Color = c;
     }
 
+    public Vector2 Position
+    {
+        get { return new Vector2(X, Y); }
+        set { Position = value; }
+    }
+
     public bool IsInBounds()
     {
         if (X < 0 || X >= TetrisGrid.Width || Y >= TetrisGrid.Height)
@@ -24,7 +30,7 @@ class SubBlock
     {
         foreach (SubBlock subBlock in TetrisGame.allSubBlocks)
         {
-            if (IsSubBlockAtPosition(x, y))
+            if (GetSubBlockAtPosition(x, y) != null)
                 return false;
         }
         return true;
@@ -36,12 +42,12 @@ class SubBlock
         Y = y;
     }
 
-    public static bool IsSubBlockAtPosition(int x, int y)
+    public static SubBlock GetSubBlockAtPosition(int x, int y)
     {
         foreach (SubBlock subBlock in TetrisGame.allSubBlocks)
             if (subBlock.X == x && subBlock.Y == y)
-                return true;
-        return false;
+                return subBlock;
+        return null;
     }
 }
 

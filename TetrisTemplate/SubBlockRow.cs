@@ -8,8 +8,8 @@ static class SubBlockRow
         List<SubBlock> subBlockList = new List<SubBlock>();
         for (int x = 0; x < TetrisGrid.Width; x++)
         {
-            if (GameWorld.GetSubBlockAtPosition(x, y) != null)
-                subBlockList.Add(GameWorld.GetSubBlockAtPosition(x, y));
+            if (SubBlock.GetSubBlockAtPosition(x, y) != null)
+                subBlockList.Add(SubBlock.GetSubBlockAtPosition(x, y));
         }
         return subBlockList;
     }

@@ -18,20 +18,15 @@ class Block
     {
         foreach (SubBlock subBlock1 in subBlockArray)
         {
-            if (TetrisGame.allSubBlocks.ToArray().Length > 0)
-            {
-                foreach (SubBlock subBlock2 in TetrisGame.allSubBlocks)
-                {
                     SubBlock turnBlock = GetCurrentTurnBlock();
                     int tx = turnBlock.X;
                     int ty = turnBlock.Y;
                     SubBlock temporarySubBlock = new SubBlock(subBlock1.Y + tx - ty, -subBlock1.X + tx + ty, subBlock1.Color);
 
-                    if (temporarySubBlock.IsInSubBlock(subBlock2) || !temporarySubBlock.IsInBounds())
+                    if (SubBlock.GetSubBlockAtPosition(temporarySubBlock.X, temporarySubBlock.Y) != null || !temporarySubBlock.IsInBounds())
                     { return false; }
                     temporarySubBlock = null;
-                }
-            }
+            
         }
         return true;
     }
@@ -65,7 +60,12 @@ class Block
     {
         foreach (SubBlock subBlock in subBlockArray)
         {
-            SubBlock changedSubBlock = new SubBlock(subBlock.X + xChange, subBlock.Y + yChange, subBlock.Color);
+            SubBlock nextSubBlock = new SubBlock(subBlock.X + xChange, subBlock.Y + yChange, subBlock.Color);
+
+            if(SubBlock.GetSubBlockAtPosition(nextSubBlock.X, nextSubBlock.Y) != null || !nextSubBlock.IsInBounds()){
+                return false;
+            }
+            /*SubBlock changedSubBlock = new SubBlock(subBlock.X + xChange, subBlock.Y + yChange, subBlock.Color);
             //Debug.WriteLine("subBlockX: " + subBlock.X + "changedSubBlock: " + changedSubBlock.X);
             if (changedSubBlock.X < 0 || changedSubBlock.X >= TetrisGrid.Width || changedSubBlock.Y >= TetrisGrid.Height)
             { return false; }
@@ -73,10 +73,10 @@ class Block
             {
                 foreach (SubBlock fallenSubBlock in TetrisGame.allSubBlocks)
                 {
-                    if (SubBlockOperations.IsSubBlockAtPosition(fallenSubBlock.X, subBlock.Y))
+                    if (SubBlock.GetSubBlockAtPosition(fallenSubBlock.X, fallenSubBlock.Y))
                         return false;
                 }
-            }
+            } */
         }
         return true;
     }

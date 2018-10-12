@@ -51,6 +51,7 @@ class TetrisGame : Game
         // set the directory where game assets are located
         Content.RootDirectory = "Content";
 
+
         // set the desired window size
         ScreenSize = new Point(800, 600);
         graphics.PreferredBackBufferWidth = ScreenSize.X;
@@ -63,7 +64,7 @@ class TetrisGame : Game
         allSubBlocks = new List<SubBlock> { };
         nextBlock = new Block(15, 3, (new Random()).Next(0, amountOfBlockForms));
         List<int[][]> fallenSubBlockList = new List<int[][]>(); //Lijst van alle blokjes die momenteel stil staan en niet meer kunnen bewgen
-        //Lijst van alle grote blokken die momenteel stil staan.
+
     }
 
     protected override void LoadContent()
@@ -122,13 +123,13 @@ class TetrisGame : Game
     }
     public void RemoveFullRows()
     {
-        List<int> YCoordinates = SubBlockOperations.GetAllRowsYCoordinates();
+        List<int> YCoordinates = SubBlockRow.GetAllRowsYCoordinates();
         foreach (int y in YCoordinates)
         {
-            if (SubBlockOperations.IsRowFull(y))
+            if (SubBlockRow.IsRowFull(y))
             {
-                SubBlockOperations.ClearRow(y);
-                SubBlockOperations.Fall(y);
+                SubBlockRow.ClearRow(y);
+                SubBlockRow.Fall(y);
                 score += 30;
             }
         }
@@ -177,9 +178,9 @@ class TetrisGame : Game
                 BlockFallDown();
             if (inputHelper.KeyDown(Keys.Down))
                 downTimeCounter += 4 * (float)gameTime.ElapsedGameTime.TotalSeconds;
-            if (blockWaitTime <= blockTimeCounter)
-                CreateNewBlock();
         }
+        else if (blockWaitTime <= blockTimeCounter)
+                CreateNewBlock();
 
         downTimeCounter += (float)gameTime.ElapsedGameTime.TotalSeconds;
         blockTimeCounter += (float)gameTime.ElapsedGameTime.TotalSeconds;
@@ -194,11 +195,12 @@ class TetrisGame : Game
     {
         GraphicsDevice.Clear(Color.White);
         spriteBatch.Begin();
-        for (int x = 0; x < TetrisGrid.Width; x++)
+        tetrisGrid.Draw(gameTime, spriteBatch);
+        /*for (int x = 0; x < TetrisGrid.Width; x++)
         {
             for (int y = 0; y < TetrisGrid.Height; y++)
                 spriteBatch.Draw(emptyCell, new Vector2(x * emptyCell.Width, y * emptyCell.Height), Color.White);
-        }
+        } */
         if (currentBlock != null)
         {
             foreach (SubBlock subBlock in currentBlock.subBlockArray)
