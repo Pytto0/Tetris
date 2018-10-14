@@ -16,6 +16,7 @@ class TetrisGame : Game
     Texture2D emptyCell;
     TetrisGrid tetrisGrid;
     SpriteFont font;
+    bool spaceReady = false;
     int[][][] allBlocks = new int[0][][];
     public int score, level;
     const int amountOfBlockForms = 7;
@@ -136,14 +137,33 @@ class TetrisGame : Game
         }
     }
 
-    public void BlockFallDown()
+    public void Difficulty(int x)
     {
-        
-        if (level < 15)
+        if (level < x)
             downTimeCounter = level * 0.03f;
         else
-            downTimeCounter = 15 * 0.03f;
+            downTimeCounter = x * 0.03f;
+    }
 
+    public void GameMode()
+    {
+        if (gameWorld.gameState == GameWorld.GameState.Playing)
+            Difficulty(13);
+        else if (gameWorld.gameState == GameWorld.GameState.HardMode)
+            Difficulty(16);
+    }
+
+    public void State()
+    {
+        if (inputHelper.KeyPressed(Keys.N))
+            gameWorld.gameState = GameWorld.GameState.Playing;
+        if (inputHelper.KeyPressed(Keys.H))
+            gameWorld.gameState = GameWorld.GameState.HardMode;
+    }
+
+    public void BlockFallDown()
+    {
+        GameMode();
         if (currentBlock.CanMoveRelativeTo(0, 1))
             currentBlock.MoveRelativeTo(0, 1);
         else
@@ -164,40 +184,60 @@ class TetrisGame : Game
         blockTimeCounter = 0;
     }
 
-
     protected override void Update(GameTime gameTime)
     {
-        level = (int) (Math.Floor((double) (score/100)) + 1);
-
-        if (inputHelper.KeyPressed(Keys.Space) || IsGameOver())
-            Reset();
         if (inputHelper.KeyPressed(Keys.Escape))
             Exit();
-
-        if (currentBlock != null)
+        if (Keyboard.GetState().IsKeyDown(Keys.Space) && spaceReady == false)
         {
-            ExecuteKeyOrders();
-            if (downWaitTime <= downTimeCounter)
-                BlockFallDown();
-            if (inputHelper.KeyDown(Keys.Down))
-                downTimeCounter += 4 * (float)gameTime.ElapsedGameTime.TotalSeconds;
+            spaceReady = true;
+            Reset();
         }
-        else if (blockWaitTime <= blockTimeCounter)
-                CreateNewBlock();
 
-        downTimeCounter += (float)gameTime.ElapsedGameTime.TotalSeconds;
-        blockTimeCounter += (float)gameTime.ElapsedGameTime.TotalSeconds;
-        currentGameTime += (float) gameTime.ElapsedGameTime.TotalSeconds;
+        if (IsGameOver())
+            gameWorld.gameState = GameWorld.GameState.GameOver;
+        if (inputHelper.KeyPressed(Keys.Space) && IsGameOver())
+        {
+            gameWorld.gameState = GameWorld.GameState.Playing;
+            Reset();
+        }
 
-        inputHelper.Update(gameTime);
-        gameWorld.HandleInput(gameTime, inputHelper);
-        gameWorld.Update(gameTime); 
+        if (spaceReady)
+        {
+            level = (int)(Math.Floor((double)(score / 100)) + 1);
+            if (inputHelper.KeyDown(Keys.LeftShift))
+                State();
+            if (gameWorld.gameState != GameWorld.GameState.GameOver)
+            {
+                if (currentBlock != null)
+                {
+                    ExecuteKeyOrders();
+                    if (downWaitTime <= downTimeCounter)
+                        BlockFallDown();
+                    if (inputHelper.KeyDown(Keys.Down))
+                        downTimeCounter += 4 * (float)gameTime.ElapsedGameTime.TotalSeconds;
+                }
+                else if (blockWaitTime <= blockTimeCounter)
+                    CreateNewBlock();
+            }
+
+            downTimeCounter += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            blockTimeCounter += (float)gameTime.ElapsedGameTime.TotalSeconds;
+            if (!IsGameOver())
+                currentGameTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
+
+            inputHelper.Update(gameTime);
+            gameWorld.HandleInput(gameTime, inputHelper);
+            gameWorld.Update(gameTime);
+        }
     }
 
     protected override void Draw(GameTime gameTime)
     {
         GraphicsDevice.Clear(Color.White);
         spriteBatch.Begin();
+        if (!spaceReady && !IsGameOver())
+            spriteBatch.DrawString(font, "Druk op de spatiebalk om te beginnen", new Vector2(400, 300), Color.Black);
         tetrisGrid.Draw(gameTime, spriteBatch);
 
         if (currentBlock != null)

@@ -1,5 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
+using System.Diagnostics;
 using System;
 
 /// <summary>
@@ -8,13 +10,16 @@ using System;
 /// </summary>
 class GameWorld
 {
+    InputHelper inputHelper;
+    TetrisGame tetrisGame;
     /// <summary>
     /// An enum for the different game states that the game can have.
     /// </summary>
-    enum GameState
+    public enum GameState
     {
+        GameOver,
         Playing,
-        GameOver
+        HardMode
     }
 
     /// <summary>
@@ -29,7 +34,7 @@ class GameWorld
     /// <summary>
     /// The current game state.
     /// </summary>
-    GameState gameState;
+    public GameState gameState;
 
     /// <summary>
     /// The main grid of the game.
@@ -44,17 +49,11 @@ class GameWorld
         //grid = new TetrisGrid();
     }
 
-
     public void HandleInput(GameTime gameTime, InputHelper inputHelper)
     {
     }
 
     public void Update(GameTime gameTime)
-    {
-    }
-
-
-    public void State()
     {
     }
 
@@ -71,5 +70,4 @@ class GameWorld
     public void Reset()
     {
     }
-
 }
