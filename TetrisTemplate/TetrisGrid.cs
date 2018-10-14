@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// A class for representing the Tetris playing grid.
 /// </summary>
-class TetrisGrid : TetrisGame
+class TetrisGrid
 {
     /// The sprite of a single empty cell in the grid.
     Texture2D emptyCell;
@@ -26,9 +26,9 @@ class TetrisGrid : TetrisGame
     /// Creates a new TetrisGrid.
     /// </summary>
     /// <param name="b"></param>
-    public TetrisGrid()
+    public TetrisGrid(Texture2D cell)
     {
-        
+        emptyCell = cell; 
         position = Vector2.Zero;
         grid = new List<SubBlock>();
         
@@ -38,6 +38,7 @@ class TetrisGrid : TetrisGame
 
     public void UpdateGrid()
     {
+        Clear();
         for (int x = 0; x < Width; x++)
         {
             for (int y = 0; y < Height; y++)
@@ -61,7 +62,7 @@ class TetrisGrid : TetrisGame
         foreach(SubBlock subBlock in grid)
         {
             spriteBatch.Draw(emptyCell, new Vector2(subBlock.X * emptyCell.Width, subBlock.Y * emptyCell.Height), subBlock.Color);
-        }
+        } 
     }
     /// <summary>
     /// Clears the grid.

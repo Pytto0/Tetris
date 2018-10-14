@@ -41,7 +41,7 @@ class GameWorld
         Random random = new Random();
         gameState = GameState.Playing;
         font = TetrisGame.ContentManager.Load<SpriteFont>("SpelFont");
-        grid = new TetrisGrid();
+        //grid = new TetrisGrid();
     }
 
 
@@ -61,10 +61,10 @@ class GameWorld
     public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
     {
         //if (state == 1){
-        spriteBatch.Begin();
-        grid.Draw(gameTime, spriteBatch);
+        //spriteBatch.Begin();
+        //grid.Draw(gameTime, spriteBatch);
         //spriteBatch.DrawString(font, "Hello!", new Vector2(30*TetrisGrid.Width + 20, 5*TetrisGrid.Height), Color.Blue);
-        spriteBatch.End();
+        //spriteBatch.End(); 
         //}
     }
 

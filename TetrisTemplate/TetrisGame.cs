@@ -59,7 +59,6 @@ class TetrisGame : Game
 
         // create the input helper object
         inputHelper = new InputHelper();
-        tetrisGrid = new TetrisGrid();
 
         allSubBlocks = new List<SubBlock> { };
         nextBlock = new Block(15, 3, (new Random()).Next(0, amountOfBlockForms));
@@ -71,6 +70,7 @@ class TetrisGame : Game
     {
         spriteBatch = new SpriteBatch(GraphicsDevice);
         emptyCell = Content.Load<Texture2D>("Block");
+        tetrisGrid = new TetrisGrid(emptyCell);
         // create and reset the game world
         font = ContentManager.Load<SpriteFont>("SpelFont");
         gameWorld = new GameWorld();
@@ -123,6 +123,7 @@ class TetrisGame : Game
     }
     public void RemoveFullRows()
     {
+        
         List<int> YCoordinates = SubBlockRow.GetAllRowsYCoordinates();
         foreach (int y in YCoordinates)
         {
@@ -137,6 +138,7 @@ class TetrisGame : Game
 
     public void BlockFallDown()
     {
+        
         if (level < 15)
             downTimeCounter = level * 0.03f;
         else
@@ -155,6 +157,7 @@ class TetrisGame : Game
 
     public void CreateNewBlock()
     {
+        
         Random rnd = new Random();
         currentBlock = new Block(4, -3, nextBlock.Form);
         nextBlock = new Block(15, 3, rnd.Next(0, amountOfBlockForms));
@@ -188,7 +191,7 @@ class TetrisGame : Game
 
         inputHelper.Update(gameTime);
         gameWorld.HandleInput(gameTime, inputHelper);
-        gameWorld.Update(gameTime);
+        gameWorld.Update(gameTime); 
     }
 
     protected override void Draw(GameTime gameTime)
@@ -196,11 +199,7 @@ class TetrisGame : Game
         GraphicsDevice.Clear(Color.White);
         spriteBatch.Begin();
         tetrisGrid.Draw(gameTime, spriteBatch);
-        /*for (int x = 0; x < TetrisGrid.Width; x++)
-        {
-            for (int y = 0; y < TetrisGrid.Height; y++)
-                spriteBatch.Draw(emptyCell, new Vector2(x * emptyCell.Width, y * emptyCell.Height), Color.White);
-        } */
+
         if (currentBlock != null)
         {
             foreach (SubBlock subBlock in currentBlock.subBlockArray)
@@ -221,7 +220,7 @@ class TetrisGame : Game
         spriteBatch.DrawString(font, passedTime, new Vector2(500, 500), Color.Blue);
 
         spriteBatch.End();
-        gameWorld.Draw(gameTime, spriteBatch);
+        gameWorld.Draw(gameTime, spriteBatch); 
     }
 }
 
