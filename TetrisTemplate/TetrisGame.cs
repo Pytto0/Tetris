@@ -148,7 +148,7 @@ class TetrisGame : Game
     public void GameMode()
     {
         if (gameWorld.gameState == GameWorld.GameState.Playing)
-            Difficulty(13);
+            Difficulty(11);
         else if (gameWorld.gameState == GameWorld.GameState.HardMode)
             Difficulty(16);
     }
