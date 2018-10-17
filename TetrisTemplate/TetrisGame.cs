@@ -21,7 +21,7 @@ class TetrisGame : Game
     public int score, level;
     const int amountOfBlockForms = 7;
     const float constBlockWaitTime = 1f, constDownWaitTime = 0.5f;
-    float blockWaitTime = constBlockWaitTime, blockTimeCounter, downWaitTime = constDownWaitTime, downTimeCounter, currentGameTime = 0f;
+    public float blockWaitTime = constBlockWaitTime, blockTimeCounter, downWaitTime = constDownWaitTime, downTimeCounter, currentGameTime = 0f;
 
     /// <summary>
     /// A static reference to the ContentManager object, used for loading assets.
@@ -137,7 +137,7 @@ class TetrisGame : Game
         }
     }
 
-    public void Difficulty(int x)
+    public void SetDifficultyTo(int x)
     {
         if (level < x)
             downTimeCounter = level * 0.03f;
@@ -148,12 +148,12 @@ class TetrisGame : Game
     public void GameMode()
     {
         if (gameWorld.gameState == GameWorld.GameState.Playing)
-            Difficulty(11);
+            SetDifficultyTo(11);
         else if (gameWorld.gameState == GameWorld.GameState.HardMode)
-            Difficulty(16);
+            SetDifficultyTo(16);
     }
 
-    public void State()
+    public void SetState()
     {
         if (inputHelper.KeyPressed(Keys.N))
             gameWorld.gameState = GameWorld.GameState.Playing;
@@ -206,7 +206,7 @@ class TetrisGame : Game
         {
             level = (int)(Math.Floor((double)(score / 100)) + 1);
             if (inputHelper.KeyDown(Keys.LeftShift))
-                State();
+                SetState();
             if (gameWorld.gameState != GameWorld.GameState.GameOver)
             {
                 if (currentBlock != null)
@@ -236,8 +236,13 @@ class TetrisGame : Game
     {
         GraphicsDevice.Clear(Color.White);
         spriteBatch.Begin();
-        if (!spaceReady && !IsGameOver())
-            spriteBatch.DrawString(font, "Druk op de spatiebalk om te beginnen", new Vector2(400, 300), Color.Black);
+        if (!spaceReady)
+            spriteBatch.DrawString(font, "Druk op de spatiebalk om te beginnen.", new Vector2(400, 300), Color.Black);
+        if (IsGameOver())
+        {
+            spriteBatch.DrawString(font, "Je hebt verloren. Jouw score is: " + score, new Vector2(420, 260), Color.Black);
+            spriteBatch.DrawString(font, "Druk op de spatiebalk om opnieuw te beginnen.", new Vector2(360, 300), Color.Black);
+        }
         tetrisGrid.Draw(gameTime, spriteBatch);
 
         if (currentBlock != null)
@@ -258,9 +263,8 @@ class TetrisGame : Game
         spriteBatch.DrawString(font, currentlevel, new Vector2(500, 460), Color.Blue);
         spriteBatch.DrawString(font, scorecount, new Vector2(500, 480), Color.Blue);
         spriteBatch.DrawString(font, passedTime, new Vector2(500, 500), Color.Blue);
-
+        gameWorld.Draw(gameTime, spriteBatch);
         spriteBatch.End();
-        gameWorld.Draw(gameTime, spriteBatch); 
     }
 }
 

@@ -12,6 +12,8 @@ class GameWorld
 {
     InputHelper inputHelper;
     TetrisGame tetrisGame;
+    public int score, level;
+    public float currentGameTime = 0f;
     /// <summary>
     /// An enum for the different game states that the game can have.
     /// </summary>
@@ -59,12 +61,14 @@ class GameWorld
 
     public void Draw(GameTime gameTime, SpriteBatch spriteBatch)
     {
-        //if (state == 1){
-        //spriteBatch.Begin();
-        //grid.Draw(gameTime, spriteBatch);
-        //spriteBatch.DrawString(font, "Hello!", new Vector2(30*TetrisGrid.Width + 20, 5*TetrisGrid.Height), Color.Blue);
-        //spriteBatch.End(); 
-        //}
+        /*if (state == 1){
+        spriteBatch.Begin();
+        grid.Draw(gameTime, spriteBatch);
+        spriteBatch.DrawString(font, "Hello!", new Vector2(30*TetrisGrid.Width + 20, 5*TetrisGrid.Height), Color.Blue);
+        spriteBatch.End(); 
+        }*/
+        //Debug.WriteLine("Test One");
+
     }
 
     public void Reset()
