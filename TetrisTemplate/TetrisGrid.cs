@@ -39,11 +39,11 @@ class TetrisGrid
     public void UpdateGrid()
     {
         Clear();
-        for (int x = 0; x < Width; x++)
+        for (int x = (int) position.X; x < Width; x++)
         {
-            for (int y = 0; y < Height; y++)
+            for (int y = (int)position.Y; y < Height; y++)
             {
-                SubBlock gridBlock = new SubBlock(x, y, Color.Gray);
+                SubBlock gridBlock = new SubBlock(x, y, Color.White);
                 if (SubBlock.GetSubBlockAtPosition(x, y) == null)
                     grid.Add(gridBlock);
             }

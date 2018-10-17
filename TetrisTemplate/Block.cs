@@ -1,7 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using System.Diagnostics;
-using System.Linq;
-using System.Collections.Generic;
 
 class Block
 {
@@ -65,18 +62,6 @@ class Block
             if(SubBlock.GetSubBlockAtPosition(nextSubBlock.X, nextSubBlock.Y) != null || !nextSubBlock.IsInBounds()){
                 return false;
             }
-            /*SubBlock changedSubBlock = new SubBlock(subBlock.X + xChange, subBlock.Y + yChange, subBlock.Color);
-            //Debug.WriteLine("subBlockX: " + subBlock.X + "changedSubBlock: " + changedSubBlock.X);
-            if (changedSubBlock.X < 0 || changedSubBlock.X >= TetrisGrid.Width || changedSubBlock.Y >= TetrisGrid.Height)
-            { return false; }
-            if (TetrisGame.allSubBlocks.ToArray().Length > 0)
-            {
-                foreach (SubBlock fallenSubBlock in TetrisGame.allSubBlocks)
-                {
-                    if (SubBlock.GetSubBlockAtPosition(fallenSubBlock.X, fallenSubBlock.Y))
-                        return false;
-                }
-            } */
         }
         return true;
     }
