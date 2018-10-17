@@ -10,8 +10,7 @@ using System;
 /// </summary>
 class GameWorld
 {
-    InputHelper inputHelper;
-
+    //InputHelper inputHelper;
     /// <summary>
     /// An enum for the different game states that the game can have.
     /// </summary>
@@ -19,8 +18,8 @@ class GameWorld
     {
         NotStarted,
         GameOver,
-        Playing,
-        HardMode
+        Playing
+
     }
 
     /// <summary>
@@ -45,15 +44,12 @@ class GameWorld
     public GameWorld(Texture2D emptyCell)
     {
         Random random = new Random();
-        gameState = GameState.Playing;
+        gameState = GameState.NotStarted;
         grid = new TetrisGrid(emptyCell);
         font = TetrisGame.ContentManager.Load<SpriteFont>("SpelFont");
         //grid = new TetrisGrid();
     }
 
-    public void HandleInput(GameTime gameTime, InputHelper inputHelper)
-    {
-    }
 
     public void Update(GameTime gameTime)
     {
@@ -90,7 +86,7 @@ class GameWorld
         spriteBatch.DrawString(font, passedTime, new Vector2(500, 500), Color.Blue);
     }
 
-    public void Reset()
-    {
-    }
+    //public void Reset()
+    //{
+    //}
 }
