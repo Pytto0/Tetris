@@ -51,9 +51,7 @@ class GameWorld
     }
 
 
-    public void Update(GameTime gameTime)
-    {
-    }
+
 
     public void Draw(GameTime gameTime, SpriteBatch spriteBatch, Block currentBlock, Block nextBlock, Texture2D emptyCell)
     {

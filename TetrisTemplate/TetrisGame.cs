@@ -18,8 +18,9 @@ class TetrisGame : Game
     SpriteFont font;
     public static int score { get; private set; }
     public static int level { get; private set; }
+    public static int maxLevel { get; private set; } = normalModeMaxLevel;
     public static float currentGameTime { get; private set; } = 0f;
-    private const int amountOfBlockForms = 7;
+    private const int amountOfBlockForms = 7, normalModeMaxLevel = 10, hardModeMaxLevel = 15;
     private const float constBlockWaitTime = 1f, constDownWaitTime = 0.5f;
     private float blockWaitTime = constBlockWaitTime, blockTimeCounter, downWaitTime = constDownWaitTime, downTimeCounter;
     public static int difficulty = 0;
@@ -28,7 +29,7 @@ class TetrisGame : Game
     /// A static reference to the ContentManager object, used for loading assets.
     /// </summary>
     public static ContentManager ContentManager { get; private set; }
-    public static List<SubBlock> allSubBlocks { get; private set; } //we willen dit alleenmaar vanuit deze klasse kunnen aanpassen (opvragen mag altijd).
+    public static List<SubBlock> allSubBlocks { get; private set; } //we willen dit alleen maar vanuit deze klasse kunnen aanpassen (opvragen mag altijd).
     public Block currentBlock, nextBlock;
     /// <summary>
     /// A static reference to the width and height of the screen.
@@ -62,7 +63,7 @@ class TetrisGame : Game
         // create the input helper object
         inputHelper = new InputHelper();
 
-        allSubBlocks = new List<SubBlock> { };         //Lijst van alle blokjes die momenteel stil staan en niet meer kunnen bewgen
+        allSubBlocks = new List<SubBlock> { };         //Lijst van alle blokjes die momenteel stil staan en niet meer kunnen bewegen
         nextBlock = new Block(15, 3, GameWorld.Random.Next(0, amountOfBlockForms));
 
     }
@@ -78,7 +79,7 @@ class TetrisGame : Game
         Reset();
     }
 
-    public bool IsGameOver()
+    public bool CheckIfGameOver()
     {
         foreach (SubBlock subBlock in allSubBlocks)
         {
@@ -88,7 +89,7 @@ class TetrisGame : Game
         return false;
     }
 
-    public void Reset()
+    private void Reset()
     {
         score = 0;
         level = 1;
@@ -97,32 +98,15 @@ class TetrisGame : Game
         blockWaitTime = constBlockWaitTime;
         downWaitTime = constDownWaitTime;
         currentBlock = null;
+       // gameWorld.gameState = GameWorld.GameState.NotStarted; 
+
     }
 
-    public void ExecuteKeyOrders()
+    /*private void ExecuteKeyOrders()
     {
-        KeyboardState kbs = Keyboard.GetState();
-        Keys[] keys = kbs.GetPressedKeys();
-        foreach (Keys key in inputHelper.GetPressedKeys())
-        {
-            switch (key)
-            { 
-                case Keys.Up:
-                    if(currentBlock != null && currentBlock.CanTurn() )
-                        currentBlock.Turn();
-                    break;
-                case Keys.Right:
-                    if (currentBlock != null && currentBlock.CanMoveRelativeTo(1, 0))
-                        currentBlock.MoveRelativeTo(1, 0);
-                    break;
-                case Keys.Left:
-                    if (currentBlock != null && currentBlock.CanMoveRelativeTo(-1, 0))
-                        currentBlock.MoveRelativeTo(-1, 0);
-                    break;
-            }
-        }
-    }
-    public void RemoveFullRows()
+       
+    } */
+    private void RemoveFullRows()
     {
         
         List<int> YCoordinates = SubBlockRow.GetAllRowsYCoordinates();
@@ -137,13 +121,13 @@ class TetrisGame : Game
         }
     }
 
-    public void SetLimitTo(int x)
+    /*public void SetLevelLimitTo(int x)
     {
         if (level < x)
             downTimeCounter = level * 0.03f;
         else
             downTimeCounter = x * 0.03f;
-    }
+    } */
 
   /*  public bool isPlaying()
     {
@@ -154,7 +138,7 @@ class TetrisGame : Game
         return false;
     } */
 
-    public void BlockFallDown()
+    private void BlockFallDown()
     {
         if (currentBlock.CanMoveRelativeTo(0, 1))
             currentBlock.MoveRelativeTo(0, 1);
@@ -165,56 +149,103 @@ class TetrisGame : Game
             currentBlock = null;
             RemoveFullRows();
         }
+        downTimeCounter = 0;
     }
 
-    public void CreateNewBlock()
+    private void CreateNewBlock()
     {
         currentBlock = new Block(4, -3, nextBlock.Form);
         nextBlock = new Block(15, 3, GameWorld.Random.Next(0, amountOfBlockForms));
         blockTimeCounter = 0;
     }
 
-    public void SetGameMode(InputHelper inputHelper)
+    private int GetCorrectLevel()
+    {
+        int levelHolder = (int)(Math.Floor((double)(score / 100)) + 1);
+        //Debug.WriteLine(levelHolder);
+        if (levelHolder > maxLevel)
+            return maxLevel;
+        else
+        {
+            return levelHolder;
+        }
+    }
+
+    /*public void SetGameMode()
     {
         if (inputHelper.KeyPressed(Keys.D1) && gameWorld.gameState == GameWorld.GameState.Playing)
-            SetLimitTo(11);
+            SetLevelLimitTo(11);
         else if (inputHelper.KeyPressed(Keys.D2) && gameWorld.gameState == GameWorld.GameState.Playing)
-            SetLimitTo(16);
-    }
+            SetLevelLimitTo(16);
+    } */
 
     public void HandleInput(GameTime gameTime)
     {
-        if (Keyboard.GetState().IsKeyDown(Keys.Space) && gameWorld.gameState == GameWorld.GameState.NotStarted)
+        //KeyboardState kbs = Keyboard.GetState();
+        inputHelper.Update(gameTime);
+
+        List<Keys> keys = inputHelper.GetPressedKeys();
+        if (keys != null)
         {
-            gameWorld.gameState = GameWorld.GameState.Playing;
-            Reset();
+            GameWorld.GameState gs = gameWorld.gameState;
+            ////Debug.WriteLine(keys.Count);
+            foreach (Keys key in keys)
+            {
+                switch (key)
+                {
+                    case Keys.Up:
+                        //Debug.WriteLine("test3");
+                        if (currentBlock != null && currentBlock.CanTurn())
+                            currentBlock.Turn();
+                        break;
+                    case Keys.Right:
+                        if (currentBlock != null && currentBlock.CanMoveRelativeTo(1, 0))
+                            currentBlock.MoveRelativeTo(1, 0);
+                        break;
+                    case Keys.Left:
+                        if (currentBlock != null && currentBlock.CanMoveRelativeTo(-1, 0))
+                            currentBlock.MoveRelativeTo(-1, 0);
+                        break;
+                    case Keys.Space:
+                        //Debug.WriteLine("test325");
+                        if (gs != GameWorld.GameState.Playing)
+                        {
+                            gameWorld.gameState = GameWorld.GameState.Playing;
+                            Reset();
+                        }
+                        break;
+                    case Keys.Escape:
+                        Exit();
+                        break;
+                    case Keys.D1:
+                        //Debug.WriteLine("test2");
+                        if (gs == GameWorld.GameState.NotStarted)
+                            maxLevel = normalModeMaxLevel;
+                        break;
+                    case Keys.D2:
+                        if (gs == GameWorld.GameState.NotStarted)
+                            maxLevel = hardModeMaxLevel;
+                        break;
+
+                }
+            }
         }
 
-        if (inputHelper.KeyPressed(Keys.Space) && (gameWorld.gameState != GameWorld.GameState.Playing))
-        {
-            gameWorld.gameState = GameWorld.GameState.Playing;
-            Reset();
-        }
-        if (inputHelper.KeyPressed(Keys.Escape))
-            Exit();
-        if (IsGameOver())
-            gameWorld.gameState = GameWorld.GameState.GameOver;
-        if (inputHelper.KeyDown(Keys.LeftShift) && gameWorld.gameState == GameWorld.GameState.Playing)
-            SetGameMode(inputHelper);
+       
     }
 
 
     protected override void Update(GameTime gameTime)
     {
-        HandleInput(gameTime);
+       // //Debug.WriteLine("Update TetrisGame");
         if (gameWorld.gameState == GameWorld.GameState.Playing)
         {
-            Debug.WriteLine("Update TetrisGame");
-            level = (int)(Math.Floor((double)(score / 100)) + 1);
-
-                if (currentBlock != null)
+            level = GetCorrectLevel();
+            //Debug.WriteLine("a: " + GetCorrectLevel());
+            //Debug.WriteLine("b: " + level);
+            if (currentBlock != null)
                 {
-                    ExecuteKeyOrders();
+                ////Debug.WriteLine(downTimeCounter);
                     if (downWaitTime <= downTimeCounter)
                         BlockFallDown();
                     if (inputHelper.KeyDown(Keys.Down))
@@ -222,16 +253,22 @@ class TetrisGame : Game
                 }
                 else if (blockWaitTime <= blockTimeCounter)
                     CreateNewBlock();
+            if (CheckIfGameOver())
+            {
+                gameWorld.gameState = GameWorld.GameState.GameOver;
+            }
+            float elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            downTimeCounter += (float) (0.25 * (level-1) * elapsedTime) + elapsedTime; //nu heb je bij level 5 twee keer zo snel, bij level 9 drie keer zo snel en bij level 13 vier keer zo snel.
+            blockTimeCounter += elapsedTime;
+            currentGameTime += elapsedTime;
 
-            downTimeCounter += (float)gameTime.ElapsedGameTime.TotalSeconds;
-            blockTimeCounter += (float)gameTime.ElapsedGameTime.TotalSeconds;
-            if (gameWorld.gameState != GameWorld.GameState.GameOver || gameWorld.gameState != GameWorld.GameState.NotStarted)
-                currentGameTime += (float)gameTime.ElapsedGameTime.TotalSeconds;
-
-            inputHelper.Update(gameTime);
-            //gameWorld.HandleInput(gameTime, inputHelper);
-            gameWorld.Update(gameTime);
         }
+
+
+        //gameWorld.HandleInput(gameTime, inputHelper);
+        HandleInput(gameTime);
+        //gameWorld.Update(gameTime);
+       // Update(gameTime); 
     }
 
     protected override void Draw(GameTime gameTime)

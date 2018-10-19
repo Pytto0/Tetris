@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 /// <summary>
 /// A class for helping out with input-related tasks, such as checking if a key or mouse button has been pressed.
@@ -51,12 +52,17 @@ class InputHelper
     public List<Keys> GetPressedKeys()
     {
         List<Keys> l = new List<Keys>();
-        foreach(Keys k in currentKeyboardState.GetPressedKeys())
+        if (currentKeyboardState.GetPressedKeys().Length > 0)
         {
-            if (KeyPressed(k))
-                l.Add(k);
-        }
-        return l;
+            foreach (Keys k in currentKeyboardState.GetPressedKeys())
+            {
+                if (KeyPressed(k))
+                    l.Add(k);
+            }
+            ////Debug.WriteLine("test1: " + currentKeyboardState.GetPressedKeys().Length);
+            return l;
+        } 
+        return null;
     }
 
     /// <summary>

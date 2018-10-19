@@ -100,7 +100,7 @@ class Block
     {
         foreach (SubBlock subBlock in subBlockArray)
         {
-            //Debug.WriteLine("TOTALLENGTH: " + TetrisGame.allSubBlocks.ToArray().Length + " x length: " + subBlock.X + " y length: " + subBlock.Y);
+            ////Debug.WriteLine("TOTALLENGTH: " + TetrisGame.allSubBlocks.ToArray().Length + " x length: " + subBlock.X + " y length: " + subBlock.Y);
             TetrisGame.allSubBlocks.Add(subBlock);
 
         }
