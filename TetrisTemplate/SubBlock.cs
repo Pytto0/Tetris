@@ -1,53 +1,59 @@
 ﻿using Microsoft.Xna.Framework;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 class SubBlock
 {
-    public int X { get; set; }
-    public int Y { get; set; }
-    public Color Color { get; set; }
+    public int x { get; set; }
+    public int y { get; set; }
+    public Color color { get; set; }
+    public TetrisGrid grid { get; }
 
-    public SubBlock(int x, int y, Color c)
+    public SubBlock(int X, int Y, Color C, TetrisGrid Grid)
     {
-        X = x;
-        Y = y;
-        Color = c;
+        x = X;
+        y = Y;
+        color = C;
+        grid = Grid;
     }
 
     public Vector2 Position
     {
-        get { return new Vector2(X, Y); }
+        get { return new Vector2(x, y); }
         set { Position = value; }
     }
 
-    public bool IsInBounds()
-    {
-        if (X < 0 || X >= TetrisGrid.Width || Y >= TetrisGrid.Height)
-            return false;
-        return true;
-    }
+
        
     public bool CanMoveTo(int x, int y)
     {
-        foreach (SubBlock subBlock in TetrisGame.allSubBlocks)
-        {
-            if (GetSubBlockAtPosition(x, y) != null)
+            if (TetrisGrid.IsInBounds(x, y, grid))
+            {
+                if (grid.gridArr[x, y] != null)
+                {
+                    return false;
+                }
+            }
+            else
+            {
                 return false;
-        }
-        return true;
+            }
+
+            return true;
     }
 
-    public void MoveTo(int x, int y)
+    public void MoveTo(int X, int Y)
     {
-        X = x;
-        Y = y;
+        x = X;
+        y = Y;
     }
 
-    public static SubBlock GetSubBlockAtPosition(int x, int y)
+    /*public static SubBlock GetSubBlockAtPosition(int x, int y, List<SubBlock> allSubBlocks)
     {
-        foreach (SubBlock subBlock in TetrisGame.allSubBlocks)
+        foreach (SubBlock subBlock in allSubBlocks)
             if (subBlock.X == x && subBlock.Y == y)
                 return subBlock;
         return null;
-    }
+    }*/
 }
 

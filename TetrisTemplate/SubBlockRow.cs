@@ -1,53 +1,123 @@
 ﻿using Microsoft.Xna.Framework;
 using System.Collections.Generic;
+using System.Diagnostics;
 
-static class SubBlockRow
+class SubBlockRow
 {
-    public static List<SubBlock> GetRowSubBlocks(int y)
+    int y;
+    //SubBlock[,] allSubBlocks;
+    SubBlock[] rowBlocks { get; set; }
+    TetrisGrid grid;
+    public SubBlockRow(int Y, TetrisGrid Grid)
+    {
+        y = Y;
+        grid = Grid;
+        rowBlocks = new SubBlock[grid.width];
+        // allSubBlocks = gameWorld.grid.gridArr;
+        for (int x = 0; x < grid.width; x++)
+        {
+            //Debug.WriteLine("X: " + x + " Y: " + y);
+            rowBlocks[x] = grid.gridArr[x, y];
+        }
+    }
+    /*public List<SubBlock> GetRowSubBlocks(int y, List<SubBlock> allSubBlocks)
     {
         List<SubBlock> subBlockList = new List<SubBlock>();
         for (int x = 0; x < TetrisGrid.Width; x++)
         {
-            if (SubBlock.GetSubBlockAtPosition(x, y) != null)
-                subBlockList.Add(SubBlock.GetSubBlockAtPosition(x, y));
+            if (SubBlock.GetSubBlockAtPosition(x, y, allSubBlocks) != null)
+                subBlockList.Add(SubBlock.GetSubBlockAtPosition(x, y, allSubBlocks));
         }
         return subBlockList;
-    }
+    } */
 
-    public static bool IsRowFull(int y)
+    public bool IsRowFull()
     {
-        if (GetRowSubBlocks(y).Count == TetrisGrid.Width)
-            //Als er evenveel blokjes in deze rij zitten als de lengte van een rij, dan hebben we een volle rij.
-            return true;
-        else
-            return false;
-    }
-
-    public static List<int> GetAllRowsYCoordinates()
-    {
-        List<int> Rows = new List<int>();
+        for(int x = 0; x < grid.width; x++)
         {
-            for (int y = 0; y < TetrisGrid.Height; y++)
+            if(rowBlocks[x] == null)
             {
-                if (IsRowFull(y))
-                    Rows.Add(y);
+                return false;
             }
-            return Rows;
+        }
+        return true;
+    }
+    /*public static List<int> GetAllRowsYCoordinates(TetrisGrid grid)
+    {
+        List<int> rows = new List<int>();
+        for(int y = 0; y < grid.correctHeight; y++)
+        {
+            SubBlockRow row = new SubBlockRow(y, grid);
+        }
+    } */
+    private bool IsRowEmpty()
+    {
+        for(int x = 0; x < grid.width; x++)
+        {
+            if(rowBlocks[x] != null)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+    public static List<int> GetAllRowsYCoordinates(TetrisGrid grid, bool isFullOnly)
+    {
+            List<int> rows = new List<int>();
+            for (int y = 0; y < grid.height; y++)
+            {
+                SubBlockRow row = new SubBlockRow(y, grid);
+            if (isFullOnly)
+            {
+                if (row.IsRowFull())
+                    rows.Add(y);
+            }
+            else
+            {
+                if (!row.IsRowEmpty())
+                {
+                    rows.Add(y);
+                }
+            }
+            }
+            return rows;
+    }
+
+    public void ClearRow()
+    {
+        for(int x = 0; x < grid.width; x++)
+        {
+            rowBlocks[x] = null;
+            ApplyChanges();
         }
     }
 
-    public static void ClearRow(int y)
+    public void ApplyChanges()
     {
-        List<SubBlock> rowSubBlocks = GetRowSubBlocks(y);
-        foreach (SubBlock subBlock in rowSubBlocks)
-            TetrisGame.allSubBlocks.Remove(subBlock);
+        for(int x = 0; x < grid.width; x++)
+        {
+            grid.gridArr[x, y] = rowBlocks[x];
+        }
     }
 
-    public static void Fall(int yRow)
+    public void Fall()
     {
-        foreach (SubBlock fallBlock in TetrisGame.allSubBlocks)
-            if (fallBlock.Y < yRow)
-            { fallBlock.Y += 1; }
+        for(int x = 0; x < grid.width; x++)
+        {
+            if (rowBlocks[x] != null)
+            {
+                //SubBlock subBlock = rowBlocks[x];
+                SubBlock subBlock = new SubBlock(x, y, Color.Green, grid);
+                if (subBlock.CanMoveTo(x, y + 1))
+                {
+                    grid.gridArr[x, y] = grid.gridArr[x, y + 1];
+                    grid.gridArr[x, y] = null;
+                }
+            }
+            
+        }
+        y += 1; //verschuift de rij eentje omlaag.
+        ApplyChanges();
     }
 
 }

@@ -1,29 +1,39 @@
 ﻿using Microsoft.Xna.Framework;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 class Block
 {
     public SubBlock[] subBlockArray { get; }
     public int Form { get; }
+    public TetrisGrid grid { get; }
 
-    public Block(int startGridX, int startGridY, int form)
+    public Block(int startGridX, int startGridY, int form, TetrisGrid Grid)
     {
         subBlockArray = GenerateBlock(form, startGridX, startGridY);
         Form = form;
+        grid = Grid;
     }
 
     public bool CanTurn()
     {
-        foreach (SubBlock subBlock1 in subBlockArray)
+        foreach (SubBlock subBlock in subBlockArray)
         {
-                    SubBlock turnBlock = GetCurrentTurnBlock();
-                    int tx = turnBlock.X;
-                    int ty = turnBlock.Y;
-                    SubBlock temporarySubBlock = new SubBlock(subBlock1.Y + tx - ty, -subBlock1.X + tx + ty, subBlock1.Color);
+            SubBlock turnBlock = GetCurrentTurnBlock();
+            int tx = turnBlock.x;
+            int ty = turnBlock.y;
+            SubBlock temporarySubBlock = new SubBlock(subBlock.y + tx - ty, -subBlock.x + tx + ty, subBlock.color, grid);
+            if (TetrisGrid.IsInBounds(temporarySubBlock.x, temporarySubBlock.y, grid))
+            {
+                if (grid.gridArr[temporarySubBlock.x, temporarySubBlock.y] != null) 
+                    return false;
+            }
+            else
+            {
+                return false;
+            }
+            temporarySubBlock = null;
 
-                    if (SubBlock.GetSubBlockAtPosition(temporarySubBlock.X, temporarySubBlock.Y) != null || !temporarySubBlock.IsInBounds())
-                    { return false; }
-                    temporarySubBlock = null;
-            
         }
         return true;
     }
@@ -33,21 +43,22 @@ class Block
         foreach (SubBlock subBlock in subBlockArray)
         {
             SubBlock turnBlock = GetCurrentTurnBlock();
-            int x = subBlock.X;
-            int y = subBlock.Y;
-            int tx = turnBlock.X;
-            int ty = turnBlock.Y;
+            int x = subBlock.x;
+            int y = subBlock.y;
+            int tx = turnBlock.x;
+            int ty = turnBlock.y;
 
-            subBlock.X = (y + tx - ty);
-            subBlock.Y = (tx + ty - x);
+            subBlock.x = (y + tx - ty);
+            subBlock.y = (tx + ty - x);
         }
     }
 
-    public bool IsInBounds()
+    public bool IsBlockInBounds() //Let op: deze functie is anders dan de TetrisGrid.IsInBounds functie. TetrisGrid.IsInBounds kijkt alleen naar of een blokje in 
     {
         foreach (SubBlock subBlock in subBlockArray)
         {
-            if (!subBlock.IsInBounds())
+            //if (subBlock.x < (int) grid.position.X || subBlock.x > (int)(grid.position.X + grid.width)|| subBlock.y < (int)grid.position.Y || subBlock.y > (int) (grid.position.Y + grid.height)) 
+            if(TetrisGrid.IsInBounds(subBlock.x, subBlock.y, grid))
                 return false;
         }
         return true;
@@ -57,9 +68,22 @@ class Block
     {
         foreach (SubBlock subBlock in subBlockArray)
         {
-            SubBlock nextSubBlock = new SubBlock(subBlock.X + xChange, subBlock.Y + yChange, subBlock.Color);
-
-            if(SubBlock.GetSubBlockAtPosition(nextSubBlock.X, nextSubBlock.Y) != null || !nextSubBlock.IsInBounds()){
+            int newX = subBlock.x + xChange;
+            int newY = subBlock.y + yChange;
+            
+            if (TetrisGrid.IsInBounds(newX, newY, grid))
+            {
+                Debug.WriteLine("x: " + newX + " y: " + newY + "test1");
+                if (grid.gridArr[newX, newY] != null)
+                {
+                    Debug.WriteLine("af1");
+                    //Debug.WriteLine("x-as width: " + grid.gridArr.GetLength(0) + " y-as height: " + grid.gridArr.GetLength(1));
+                    return false;
+                }
+            }
+            else
+            {
+                Debug.WriteLine("af2");
                 return false;
             }
         }
@@ -70,10 +94,22 @@ class Block
     {
         foreach (SubBlock subBlock in subBlockArray)
         {
-            subBlock.X += xChange;
-            subBlock.Y += yChange;
+            //grid.gridArr[subBlock.x + xChange, subBlock.y + yChange] = grid.gridArr[subBlock.x, subBlock.y];
+            //grid.gridArr[subBlock.x, subBlock.y] = null;
+            subBlock.x += xChange;
+            subBlock.y += yChange;
+            
         }
+        //ApplyChanges();
     }
+
+    /*private void ApplyChanges()
+    {
+        foreach(SubBlock subBlock in subBlockArray)
+        {
+            grid.gridArr[subBlock.x, subBlock.y] = subBlock;
+        }
+    }*/
 
     public SubBlock GetCurrentTurnBlock()
     {
@@ -100,9 +136,10 @@ class Block
     {
         foreach (SubBlock subBlock in subBlockArray)
         {
-            ////Debug.WriteLine("TOTALLENGTH: " + TetrisGame.allSubBlocks.ToArray().Length + " x length: " + subBlock.X + " y length: " + subBlock.Y);
-            TetrisGame.allSubBlocks.Add(subBlock);
-
+            if (TetrisGrid.IsInBounds(subBlock.x, subBlock.y, grid))
+            {
+                grid.gridArr[subBlock.x, subBlock.y] = subBlock;
+            }
         }
     }
 
@@ -113,32 +150,32 @@ class Block
         {
             case 0:
                 c = Color.Yellow;
-                // turnBlock = new SubBlock(gridX, 1 + gridY, c);
-                return new SubBlock[] { new SubBlock(gridX, gridY, c), new SubBlock(gridX, 1 + gridY, c), new SubBlock(gridX, 2 + gridY, c), new SubBlock(gridX, 3 + gridY, c) }; //vierblokkige staaf
+                // turnBlock = new SubBlock(gridX, 1 + gridY, c, grid);
+                return new SubBlock[] { new SubBlock(gridX, gridY, c, grid), new SubBlock(gridX, 1 + gridY, c, grid), new SubBlock(gridX, 2 + gridY, c, grid), new SubBlock(gridX, 3 + gridY, c, grid) }; //vierblokkige staaf
             case 1:
                 c = Color.Blue;
-                // turnBlock = new SubBlock(1 + gridX, 1 + gridY, c);
-                return new SubBlock[] { new SubBlock(1 + gridX, gridY, c), new SubBlock(2 + gridX, gridY, c), new SubBlock(gridX, 1 + gridY, c), new SubBlock(1 + gridX, 1 + gridY, c) }; //omgekeerde "Z"
+                // turnBlock = new SubBlock(1 + gridX, 1 + gridY, c, grid);
+                return new SubBlock[] { new SubBlock(1 + gridX, gridY, c, grid), new SubBlock(2 + gridX, gridY, c, grid), new SubBlock(gridX, 1 + gridY, c, grid), new SubBlock(1 + gridX, 1 + gridY, c, grid) }; //omgekeerde "Z"
             case 2:
                 c = Color.Red;
-                //turnBlock = new SubBlock(1 + gridX, gridY, c);
-                return new SubBlock[] { new SubBlock(gridX, gridY, c), new SubBlock(1 + gridX, gridY, c), new SubBlock(1 + gridX, 1 + gridY, c), new SubBlock(2 + gridX, 1 + gridY, c) }; //"Z"
+                //turnBlock = new SubBlock(1 + gridX, gridY, c, grid);
+                return new SubBlock[] { new SubBlock(gridX, gridY, c, grid), new SubBlock(1 + gridX, gridY, c, grid), new SubBlock(1 + gridX, 1 + gridY, c, grid), new SubBlock(2 + gridX, 1 + gridY, c, grid) }; //"Z"
             case 3:
                 c = Color.Brown;
-                //turnBlock = new SubBlock(gridX, 1 + gridY, c);
-                return new SubBlock[] { new SubBlock(2 + gridX, gridY, c), new SubBlock(gridX, 1 + gridY, c), new SubBlock(1 + gridX, 1 + gridY, c), new SubBlock(2 + gridX, 1 + gridY, c) }; //"L"
+                //turnBlock = new SubBlock(gridX, 1 + gridY, c, grid);
+                return new SubBlock[] { new SubBlock(2 + gridX, gridY, c, grid), new SubBlock(gridX, 1 + gridY, c, grid), new SubBlock(1 + gridX, 1 + gridY, c, grid), new SubBlock(2 + gridX, 1 + gridY, c, grid) }; //"L"
             case 4:
                 c = Color.Green;
-                //turnBlock = new SubBlock(gridX, 1 + gridY, c);
-                return new SubBlock[] { new SubBlock(gridX, gridY, c), new SubBlock(gridX, 1 + gridY, c), new SubBlock(1 + gridX, 1 + gridY, c), new SubBlock(2 + gridX, 1 + gridY, c) }; //omgekeerde "L"
+                //turnBlock = new SubBlock(gridX, 1 + gridY, c, grid);
+                return new SubBlock[] { new SubBlock(gridX, gridY, c, grid), new SubBlock(gridX, 1 + gridY, c, grid), new SubBlock(1 + gridX, 1 + gridY, c, grid), new SubBlock(2 + gridX, 1 + gridY, c, grid) }; //omgekeerde "L"
             case 5:
                 c = Color.Purple;
-                //turnBlock = new SubBlock(1 + gridX, 1 + gridY, c);
-                return new SubBlock[] { new SubBlock(1 + gridX, gridY, c), new SubBlock(gridX, 1 + gridY, c), new SubBlock(1 + gridX, 1 + gridY, c), new SubBlock(2 + gridX, 1 + gridY, c) }; //"T"
+                //turnBlock = new SubBlock(1 + gridX, 1 + gridY, c, grid);
+                return new SubBlock[] { new SubBlock(1 + gridX, gridY, c, grid), new SubBlock(gridX, 1 + gridY, c, grid), new SubBlock(1 + gridX, 1 + gridY, c, grid), new SubBlock(2 + gridX, 1 + gridY, c, grid) }; //"T"
             default:
                 c = Color.Aqua;
-                //turnBlock = new SubBlock(gridX, gridY, c);
-                return new SubBlock[] { new SubBlock(gridX, gridY, c), new SubBlock(1 + gridX, gridY, c), new SubBlock(gridX, 1 + gridY, c), new SubBlock(1 + gridX, 1 + gridY, c) }; //vierkant blok
+                //turnBlock = new SubBlock(gridX, gridY, c, grid);
+                return new SubBlock[] { new SubBlock(gridX, gridY, c, grid), new SubBlock(1 + gridX, gridY, c, grid), new SubBlock(gridX, 1 + gridY, c, grid), new SubBlock(1 + gridX, 1 + gridY, c, grid) }; //vierkant blok
         }
     }
 }

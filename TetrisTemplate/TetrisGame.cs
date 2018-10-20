@@ -12,25 +12,31 @@ class TetrisGame : Game
 {
     SpriteBatch spriteBatch;
     InputHelper inputHelper;
-    GameWorld gameWorld;
+    GameWorld gameWorld, gameWorld2;
+
+    public int players { get; private set; } = 1;
     Texture2D emptyCell;
-    TetrisGrid tetrisGrid;
     SpriteFont font;
-    public static int score { get; private set; }
-    public static int level { get; private set; }
+    List<GameWorld> gameWorlds = new List<GameWorld>();
     public static int maxLevel { get; private set; } = normalModeMaxLevel;
-    public static float currentGameTime { get; private set; } = 0f;
-    private const int amountOfBlockForms = 7, normalModeMaxLevel = 10, hardModeMaxLevel = 15;
-    private const float constBlockWaitTime = 1f, constDownWaitTime = 0.5f;
-    private float blockWaitTime = constBlockWaitTime, blockTimeCounter, downWaitTime = constDownWaitTime, downTimeCounter;
-    public static int difficulty = 0;
+    public static bool multiplayer = false;
+    private const int normalModeMaxLevel = 10, hardModeMaxLevel = 15, gridWidth = 8, gridHeight = 25;
+    Keys[] p1KeySet, p2KeySet;
+    public enum GameState
+    {
+        NotStarted,
+        GameOver,
+        Playing
+
+    }
+    public static GameState gameState;
+
+    //Dit hier is onze host class. Deze class gaan we direct aan het begin van het spel aanmaken. Afhankelijk van de hoeveelheid spelers, maken we een of meerdere gameWorlds aan.
 
     /// <summary>
     /// A static reference to the ContentManager object, used for loading assets.
     /// </summary>
     public static ContentManager ContentManager { get; private set; }
-    public static List<SubBlock> allSubBlocks { get; private set; } //we willen dit alleen maar vanuit deze klasse kunnen aanpassen (opvragen mag altijd).
-    public Block currentBlock, nextBlock;
     /// <summary>
     /// A static reference to the width and height of the screen.
     /// </summary>
@@ -53,18 +59,17 @@ class TetrisGame : Game
         
         // set the directory where game assets are located
         Content.RootDirectory = "Content";
-
-
         // set the desired window size
-        ScreenSize = new Point(800, 600);
+        ScreenSize = new Point(1280, 768);
         graphics.PreferredBackBufferWidth = ScreenSize.X;
         graphics.PreferredBackBufferHeight = ScreenSize.Y;
 
         // create the input helper object
         inputHelper = new InputHelper();
+        gameState = GameState.NotStarted;
+        p1KeySet = new Keys[4] { Keys.Up, Keys.Right, Keys.Down, Keys.Left };
+        p2KeySet = new Keys[4] { Keys.W, Keys.D, Keys.S, Keys.A };
 
-        allSubBlocks = new List<SubBlock> { };         //Lijst van alle blokjes die momenteel stil staan en niet meer kunnen bewegen
-        nextBlock = new Block(15, 3, GameWorld.Random.Next(0, amountOfBlockForms));
 
     }
 
@@ -72,210 +77,106 @@ class TetrisGame : Game
     {
         spriteBatch = new SpriteBatch(GraphicsDevice);
         emptyCell = Content.Load<Texture2D>("Block");
-        tetrisGrid = new TetrisGrid(emptyCell);
         // create and reset the game world
         font = ContentManager.Load<SpriteFont>("SpelFont");
-        gameWorld = new GameWorld(emptyCell);
-        Reset();
+
+        gameWorld = new GameWorld(emptyCell, font, new Vector2(0, -3), gridHeight, gridWidth, p1KeySet);
+        gameWorlds.Add(gameWorld);
+ 
     }
 
-    public bool CheckIfGameOver()
-    {
-        foreach (SubBlock subBlock in allSubBlocks)
-        {
-            if (subBlock.Y <= 0)
-                return true; 
-        }
-        return false;
-    }
-
-    private void Reset()
-    {
-        score = 0;
-        level = 1;
-        currentGameTime = 0f;
-        allSubBlocks.Clear();
-        blockWaitTime = constBlockWaitTime;
-        downWaitTime = constDownWaitTime;
-        currentBlock = null;
-       // gameWorld.gameState = GameWorld.GameState.NotStarted; 
-
-    }
-
-    /*private void ExecuteKeyOrders()
-    {
-       
-    } */
-    private void RemoveFullRows()
-    {
-        
-        List<int> YCoordinates = SubBlockRow.GetAllRowsYCoordinates();
-        foreach (int y in YCoordinates)
-        {
-            if (SubBlockRow.IsRowFull(y))
-            {
-                SubBlockRow.ClearRow(y);
-                SubBlockRow.Fall(y);
-                score += 30;
-            }
-        }
-    }
-
-    /*public void SetLevelLimitTo(int x)
-    {
-        if (level < x)
-            downTimeCounter = level * 0.03f;
-        else
-            downTimeCounter = x * 0.03f;
-    } */
-
-  /*  public bool isPlaying()
-    {
-        if(gameWorld.gameState == GameWorld.GameState.Playing)
-        {
-            return true;
-        }
-        return false;
-    } */
-
-    private void BlockFallDown()
-    {
-        if (currentBlock.CanMoveRelativeTo(0, 1))
-            currentBlock.MoveRelativeTo(0, 1);
-        else
-        {
-            currentBlock.AddToSubBlocks();
-            score += 10;
-            currentBlock = null;
-            RemoveFullRows();
-        }
-        downTimeCounter = 0;
-    }
-
-    private void CreateNewBlock()
-    {
-        currentBlock = new Block(4, -3, nextBlock.Form);
-        nextBlock = new Block(15, 3, GameWorld.Random.Next(0, amountOfBlockForms));
-        blockTimeCounter = 0;
-    }
-
-    private int GetCorrectLevel()
-    {
-        int levelHolder = (int)(Math.Floor((double)(score / 100)) + 1);
-        //Debug.WriteLine(levelHolder);
-        if (levelHolder > maxLevel)
-            return maxLevel;
-        else
-        {
-            return levelHolder;
-        }
-    }
-
-    /*public void SetGameMode()
-    {
-        if (inputHelper.KeyPressed(Keys.D1) && gameWorld.gameState == GameWorld.GameState.Playing)
-            SetLevelLimitTo(11);
-        else if (inputHelper.KeyPressed(Keys.D2) && gameWorld.gameState == GameWorld.GameState.Playing)
-            SetLevelLimitTo(16);
-    } */
 
     public void HandleInput(GameTime gameTime)
     {
         //KeyboardState kbs = Keyboard.GetState();
         inputHelper.Update(gameTime);
-
+        //Debug.WriteLine("test2");
         List<Keys> keys = inputHelper.GetPressedKeys();
         if (keys != null)
         {
-            GameWorld.GameState gs = gameWorld.gameState;
-            ////Debug.WriteLine(keys.Count);
+            //Debug.WriteLine(keys.Count);
             foreach (Keys key in keys)
             {
                 switch (key)
                 {
-                    case Keys.Up:
-                        //Debug.WriteLine("test3");
-                        if (currentBlock != null && currentBlock.CanTurn())
-                            currentBlock.Turn();
-                        break;
-                    case Keys.Right:
-                        if (currentBlock != null && currentBlock.CanMoveRelativeTo(1, 0))
-                            currentBlock.MoveRelativeTo(1, 0);
-                        break;
-                    case Keys.Left:
-                        if (currentBlock != null && currentBlock.CanMoveRelativeTo(-1, 0))
-                            currentBlock.MoveRelativeTo(-1, 0);
-                        break;
+                    
                     case Keys.Space:
                         //Debug.WriteLine("test325");
-                        if (gs != GameWorld.GameState.Playing)
+                        if (gameState != GameState.Playing)
                         {
-                            gameWorld.gameState = GameWorld.GameState.Playing;
-                            Reset();
+                            gameState = GameState.Playing;
+                            foreach(GameWorld GW in gameWorlds) {
+                                GW.Reset(gameTime);
+                            }
+                        }
+                        break;
+                    case Keys.D1:
+                        //Debug.WriteLine("test2");
+                        if (gameState == GameState.NotStarted)
+                        //maxLevel = normalModeMaxLevel;
+                        {
+                            gameState = GameState.Playing;
+                            foreach (GameWorld GW in gameWorlds)
+                            {
+                                GW.Reset(gameTime);
+                            }
+                        }
+                        break;
+                    case Keys.D2:
+                        if (gameState == GameState.NotStarted)
+                        {
+                            //maxLevel = hardModeMaxLevel;
+                            gameWorld2 = new GameWorld(emptyCell, font, new Vector2(25, -3), gridHeight, gridWidth, p2KeySet);
+                            gameWorlds.Add(gameWorld2);
+                            multiplayer = true;
+                            gameState = GameState.Playing;
+                            foreach (GameWorld GW in gameWorlds)
+                            {
+                                GW.Reset(gameTime);
+                            }
                         }
                         break;
                     case Keys.Escape:
                         Exit();
                         break;
-                    case Keys.D1:
-                        //Debug.WriteLine("test2");
-                        if (gs == GameWorld.GameState.NotStarted)
-                            maxLevel = normalModeMaxLevel;
-                        break;
-                    case Keys.D2:
-                        if (gs == GameWorld.GameState.NotStarted)
-                            maxLevel = hardModeMaxLevel;
-                        break;
 
                 }
             }
         }
 
-       
+
     }
 
+    private void DrawStartGameText(SpriteBatch spriteBatch)
+    {
+        if (gameState == GameState.NotStarted)
+        {
+            spriteBatch.DrawString(font, "Druk op de nummer 1 knop om in je eentje te spelen.", new Vector2((gameWorld.grid.width + 3) * emptyCell.Width, 300), Color.Black);
+            spriteBatch.DrawString(font, "Druk op de nummer 2 knop om met zijn tweeen te spelen.", new Vector2((gameWorld.grid.width + 3) * emptyCell.Width, 400), Color.Black);
+        }
+
+    }
 
     protected override void Update(GameTime gameTime)
     {
-       // //Debug.WriteLine("Update TetrisGame");
-        if (gameWorld.gameState == GameWorld.GameState.Playing)
-        {
-            level = GetCorrectLevel();
-            //Debug.WriteLine("a: " + GetCorrectLevel());
-            //Debug.WriteLine("b: " + level);
-            if (currentBlock != null)
-                {
-                ////Debug.WriteLine(downTimeCounter);
-                    if (downWaitTime <= downTimeCounter)
-                        BlockFallDown();
-                    if (inputHelper.KeyDown(Keys.Down))
-                        downTimeCounter += 4 * (float)gameTime.ElapsedGameTime.TotalSeconds;
-                }
-                else if (blockWaitTime <= blockTimeCounter)
-                    CreateNewBlock();
-            if (CheckIfGameOver())
-            {
-                gameWorld.gameState = GameWorld.GameState.GameOver;
-            }
-            float elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
-            downTimeCounter += (float) (0.25 * (level-1) * elapsedTime) + elapsedTime; //nu heb je bij level 5 twee keer zo snel, bij level 9 drie keer zo snel en bij level 13 vier keer zo snel.
-            blockTimeCounter += elapsedTime;
-            currentGameTime += elapsedTime;
-
-        }
-
-
-        //gameWorld.HandleInput(gameTime, inputHelper);
         HandleInput(gameTime);
-        //gameWorld.Update(gameTime);
-       // Update(gameTime); 
+        foreach(GameWorld GW in gameWorlds)
+        {
+            GW.Update(gameTime);
+        }
     }
 
     protected override void Draw(GameTime gameTime)
     {
         spriteBatch.Begin();
         GraphicsDevice.Clear(Color.White);
-        gameWorld.Draw(gameTime, spriteBatch, currentBlock, nextBlock, emptyCell);
+        if (gameState == GameState.NotStarted)
+            DrawStartGameText(spriteBatch);
+        foreach (GameWorld GW in gameWorlds)
+        {
+            GW.Draw(gameTime, spriteBatch);
+        }
+        //gameWorld.Draw(gameTime, spriteBatch);
         spriteBatch.End();
     }
 }
